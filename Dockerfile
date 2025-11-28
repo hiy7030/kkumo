@@ -8,7 +8,7 @@ RUN apt-get update && \
     zip && \
     rm -rf /var/lib/apt/lists/*
 
-WORKDIR /build
+WORKDIR /spring-boot
 
 COPY gradlew .
 COPY gradle gradle
@@ -32,8 +32,9 @@ RUN apt-get update && \
 ENV TZ=Asia/Seoul
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-WORKDIR /app
+WORKDIR /spring-boot
 
-COPY --from=builder /build/build/libs/*.jar app.jar
+ARG JAR_FILE=/spring-boot/build/libs/*SNAPSHOT.jar
+COPY --from=builder ${JAR_FILE} app.jar
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

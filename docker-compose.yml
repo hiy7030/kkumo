@@ -6,17 +6,17 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
-    env_file:
-      - ./src/main/resources/*.env
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f *url || exit 1"] # url 변경필요
-      interval: 60s
-      timeout: 10s
-      retries: 3
-      start_period: 5s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      - "8088:8088"
+#    env_file:
+#      - ./src/main/resources/*.env
+#    healthcheck:
+#      test: ["CMD-SHELL", "curl -f *url || exit 1"] # url 변경필요
+#      interval: 60s
+#      timeout: 10s
+#      retries: 3
+#      start_period: 5s
+#    logging:
+#      driver: "json-file"
+#      options:
+#        max-size: "10m"
+#        max-file: "3"
