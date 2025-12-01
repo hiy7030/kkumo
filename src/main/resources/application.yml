@@ -1,14 +1,15 @@
 spring:
-  h2:
-    console:
-      path: /h2
-      enabled: true
-    datasource:
-      url: jdbc:h2:mem:test
+  datasource:
+    url: ${DB_URL}
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     jpa:
+      open-in-view: true
+      show-sql: false
       hibernate:
-        ddl-auto: create
+        ddl-auto: update
+      database: mysql
       properties:
         hibernate:
           format_sql: true
-          show_sql: true
