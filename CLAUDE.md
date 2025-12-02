@@ -52,7 +52,7 @@
     - `Dockerfile`: 멀티 스테이지 빌드(Multi-stage build) 적용.
     - `docker-compose.yml`: 로컬 개발(App + MySQL) 및 CloudType 배포 설정.
 - **CI/CD:**
-    - GitHub Actions (`.github/workflows/ci.yml`) 작성.
+    - GitHub Actions (`.github/workflows/deploy.yml`) 작성.
     - `main` 브랜치 Push/PR 시 Build & Test 자동 실행.
 
 ## 4. 코드 작성 원칙 (Conventions)
