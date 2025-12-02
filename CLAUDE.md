@@ -2,6 +2,14 @@
 
 이 파일은 Claude Code가 KKUMO 저장소에서 작업할 때 반드시 준수해야 할 규칙과 맥락을 정의합니다.
 
+## ⛔ 보호된 파일 (Protected Files - Do Not Modify)
+**아래 파일들은 인프라 및 배포 안정화를 위해 "동결(Freeze)" 상태입니다.**
+사용자가 명시적으로 "수정해줘"라고 요청하기 전까지는, 어떤 기능 구현 중에도 **절대 임의로 수정하거나 삭제하지 마세요.**
+
+1. **`.github/workflows/deploy.yml`** (CI/CD 파이프라인)
+2. **`Dockerfile`** (빌드 참조용)
+3. **`CLAUDE.md`** (프로젝트 규칙)
+
 ## 1. 프로젝트 개요 (Overview)
 - **프로젝트명:** KKUMO (꾸모)
 - **목표:** 1일 1회 사진 기록 및 Streak(왕관) 시스템을 통한 습관 형성 소셜 서비스.
@@ -9,9 +17,13 @@
 - **기술 스택:**
     - **Language:** Kotlin (JDK 21)
     - **Framework:** Spring Boot 3.5.8, Spring Data JPA, Spring Security
-    - **Database:** MySQL 8.0 (Prod/Local: `utf8mb4` 필수), H2 (Test)
+    - **Database:** MH2 (Local), MySQL/MariaDB (Prod - CloudType)
     - **Frontend:** Thymeleaf (SSR) + Tailwind CSS (CDN) + Fetch API
     - **Build:** Gradle (Kotlin DSL)
+    - **Database:**
+      - **Local:** H2 (`application-local.yml` 사용)
+      - **Prod:** MariaDB (`application-ops.yml` 사용)
+  - **Deployment:** GitHub Actions -> CloudType
 
 ## 2. 아키텍처 및 패키지 구조
 **도메인 중심 아키텍처 (Domain-oriented / Package-by-feature)** 를 엄격히 준수합니다.
@@ -48,12 +60,12 @@
 ### 3.2 인프라 및 DevOps (Infra)
 - **Timezone:** App & DB 모두 `Asia/Seoul` (KST) 강제 설정.
 - **Image Processing:** Cloudflare R2 업로드 전 `Thumbnailator`로 리사이징(너비 800px, WebP/JPG) 필수.
-- **Containerization:**
-    - `Dockerfile`: 멀티 스테이지 빌드(Multi-stage build) 적용.
-    - `docker-compose.yml`: 로컬 개발(App + MySQL) 및 CloudType 배포 설정.
 - **CI/CD:**
     - GitHub Actions (`.github/workflows/deploy.yml`) 작성.
     - `main` 브랜치 Push/PR 시 Build & Test 자동 실행.
+- **Environment:**
+    - **Local:** Docker 없이 H2로 가볍게 구동.
+    - **Prod:** `deploy.yml`을 통한 자동 배포 (설정 건드리지 말 것).
 
 ## 4. 코드 작성 원칙 (Conventions)
 
@@ -86,7 +98,3 @@
 
 # 테스트 실행
 ./gradlew test
-
-# 로컬 인프라 실행 (MySQL)
-docker-compose up -d
-docker-compose down
