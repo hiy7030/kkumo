@@ -27,13 +27,13 @@ jobs:
               ports: 8080
               env: 
                 - name:SPRING_PROFILES_ACTIVE
-                  var: ${{secrets.SPRING_PROFILES_ACTIVE}}
+                  secret: ${{secrets.SPRING_PROFILES_ACTIVE}}
                 - name: DB_URL 
-                  var: ${{secrets.DB_URL}}
+                  secret: ${{secrets.DB_URL}}
                 - name: DB_USERNAME 
-                  var: ${{secrets.DB_USERNAME}}
+                  secret: ${{secrets.DB_USERNAME}}
                 - name: DB_PASSWORD
-                  var: ${{secrets.DB_PASSWORD}}
+                  secret: ${{secrets.DB_PASSWORD}}
             context:
               git:
                 url: git@github.com:${{ github.repository }}.git
