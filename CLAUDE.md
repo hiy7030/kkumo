@@ -84,7 +84,28 @@
 - **커버리지:** 전체 커버리지보다 **핵심 로직(Streak, 제약조건)** 검증에 집중.
 - **도구:** JUnit5 + Mockk.
 
-## 5. 빌드 및 실행 명령어
+## 5. UI/UX Design Guidelines (KKUMO Design System)
+**Core Concept:** "Simplicity, Pastel, Soft, Cute" (Main Symbol: 👑 Crown)
+
+### Color Palette (Tailwind CSS)
+- **Background:** `bg-sky-50` (Page Main), `bg-white` (Card/Container).
+- **Accent/Button:** `bg-yellow-300` (Default), `bg-yellow-400` (Hover), `text-yellow-900` (Text for readability).
+- **Text:** `text-gray-800` (Headings), `text-gray-600` (Body), `text-red-500` (Error).
+
+### Component Style
+- **Shape:** All UI elements must use **Rounded Corners**.
+    - Containers/Cards: `rounded-3xl`, `shadow-lg`.
+    - Inputs/Buttons: `rounded-xl` or `rounded-2xl`.
+- **Logo:** Simple Crown Emoji (`👑`) centered at the top (`text-6xl`).
+
+### Interaction Patterns (Hybrid Architecture)
+- **View Navigation:** Standard `GET` requests returning Thymeleaf templates.
+- **Data Operations:** Forms (Login/Signup/Post) use `fetch` API (JSON payload).
+- **Error Handling:**
+    - **Validation/Business Error:** Show `alert(message)` (Do NOT redirect).
+    - **System Error (500):** Redirect to `error/errorPage`.
+
+## 6. 빌드 및 실행 명령어
 
 ```bash
 # 빌드 (테스트 제외하고 빠르게)

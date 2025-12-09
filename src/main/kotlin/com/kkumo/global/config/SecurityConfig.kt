@@ -38,14 +38,30 @@ class SecurityConfig {
             // HTTP Basic 비활성화
             httpBasic { disable() }
 
-            // Form Login 활성화 (기본 설정)
-            formLogin { }
+            // Form Login 활성화
+            formLogin {
+                loginPage = "/login"
+                defaultSuccessUrl("/kkumo/v1/home", true)
+                permitAll()
+            }
+
+            // Logout 설정
+            logout {
+                logoutUrl = "/logout"
+                logoutSuccessUrl = "/login?logout"
+                permitAll()
+            }
 
             // 세션 관리 (기본값: IF_REQUIRED)
             sessionManagement { }
 
             // 접근 권한 제어
             authorizeHttpRequests {
+                // 인증 페이지 허용
+                authorize("/login", permitAll)
+                authorize("/kkumo/v1/signup", permitAll)
+                authorize("/kkumo/v1/members", permitAll)
+
                 // 테스트 API 허용
                 authorize("/kkumo/v1/hello", permitAll)
 
