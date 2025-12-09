@@ -37,4 +37,6 @@ WORKDIR /spring-boot
 ARG JAR_FILE=/spring-boot/build/libs/*SNAPSHOT.jar
 COPY --from=builder ${JAR_FILE} app.jar
 
+EXPOSE 8080
+
 ENTRYPOINT ["java", "-jar", "app.jar"]
