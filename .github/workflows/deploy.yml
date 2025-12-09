@@ -27,8 +27,6 @@ jobs:
               ports: "8080"
               buildenv: []
               env: 
-                - name: SPRING_PROFILES_ACTIVE
-                  secret: SPRING_PROFILES_ACTIVE
                 - name: DB_URL 
                   secret: DB_URL
                 - name: DB_USERNAME 

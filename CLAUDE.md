@@ -7,8 +7,7 @@
 사용자가 명시적으로 "수정해줘"라고 요청하기 전까지는, 어떤 기능 구현 중에도 **절대 임의로 수정하거나 삭제하지 마세요.**
 
 1. **`.github/workflows/deploy.yml`** (CI/CD 파이프라인)
-2. **`Dockerfile`** (빌드 참조용)
-3. **`CLAUDE.md`** (프로젝트 규칙)
+2. **`CLAUDE.md`** (프로젝트 규칙)
 
 ## 1. 프로젝트 개요 (Overview)
 - **프로젝트명:** KKUMO (꾸모)
@@ -17,12 +16,11 @@
 - **기술 스택:**
     - **Language:** Kotlin (JDK 21)
     - **Framework:** Spring Boot 3.5.8, Spring Data JPA, Spring Security
-    - **Database:** MH2 (Local), MySQL/MariaDB (Prod - CloudType)
+    - **Database:** MySQL/MariaDB (CloudType)
     - **Frontend:** Thymeleaf (SSR) + Tailwind CSS (CDN) + Fetch API
     - **Build:** Gradle (Kotlin DSL)
     - **Database:**
-      - **Local:** H2 (`application-local.yml` 사용)
-      - **Prod:** MariaDB (`application-ops.yml` 사용)
+      - MariaDB
   - **Deployment:** GitHub Actions -> CloudType
 
 ## 2. 아키텍처 및 패키지 구조
@@ -64,8 +62,7 @@
     - GitHub Actions (`.github/workflows/deploy.yml`) 작성.
     - `main` 브랜치 Push/PR 시 Build & Test 자동 실행.
 - **Environment:**
-    - **Local:** Docker 없이 H2로 가볍게 구동.
-    - **Prod:** `deploy.yml`을 통한 자동 배포 (설정 건드리지 말 것).
+    - `deploy.yml`을 통한 자동 배포 (설정 건드리지 말 것).
 
 ## 4. 코드 작성 원칙 (Conventions)
 

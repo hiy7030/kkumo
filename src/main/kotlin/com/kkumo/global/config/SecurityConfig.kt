@@ -49,21 +49,11 @@ class SecurityConfig {
                 // 테스트 API 허용
                 authorize("/kkumo/v1/hello", permitAll)
 
-                // H2 Console 허용
-                authorize(PathRequest.toH2Console(), permitAll)
-
                 // 정적 리소스 허용
                 authorize(PathRequest.toStaticResources().atCommonLocations(), permitAll)
 
                 // 나머지는 인증 필요
                 authorize(anyRequest, authenticated)
-            }
-
-            // H2 Console을 위한 Frame Options 설정
-            headers {
-                frameOptions {
-                    sameOrigin = true
-                }
             }
         }
 
