@@ -22,21 +22,20 @@ jobs:
           stage: main
           yaml: |
             name: kkumo
-            app: dockerfile
+            app: java@17
             options:
-              ports: 8080
-              dockerfile: Dockerfile
+              ports: "8080"
+              buildenv: []
               env: 
                 - name: SPRING_PROFILES_ACTIVE
-                  secret: ${{secrets.SPRING_PROFILES_ACTIVE}}
+                  secret: SPRING_PROFILES_ACTIVE
                 - name: DB_URL 
-                  secret: ${{secrets.DB_URL}}
+                  secret: DB_URL
                 - name: DB_USERNAME 
-                  secret: ${{secrets.DB_USERNAME}}
+                  secret: DB_USERNAME
                 - name: DB_PASSWORD
-                  secret: ${{secrets.DB_PASSWORD}}
+                  secret: DB_PASSWORD
             context:
               git:
                 url: git@github.com:${{ github.repository }}.git
                 ref: ${{ github.ref }}
-              preset: dockerfile-java
