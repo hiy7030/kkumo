@@ -18,7 +18,7 @@ jobs:
         uses: cloudtype-github-actions/deploy@v1
         with:
           token: ${{ secrets.CLOUDTYPE_TOKEN }}
-          project: hiy7030/kkumo
+          project: hyeri.dev/kkumo
           stage: main
           yaml: |
             name: kkumo
