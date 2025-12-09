@@ -1,5 +1,5 @@
 # builder 단계
-FROM eclipse-temurin:21-jdk AS builder
+FROM eclipse-temurin:17-jdk AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ COPY src src
 RUN ./gradlew clean build --no-daemon -x test
 
 # runtime 단계
-FROM eclipse-temurin:21-jre-jammy
+FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 
