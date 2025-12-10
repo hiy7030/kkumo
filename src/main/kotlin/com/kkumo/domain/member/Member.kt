@@ -10,7 +10,7 @@ import java.time.LocalDate
 class Member(
     @Id
     @Column(name = "member_id", length = 50)
-    val mid: String = MemberIdGenerator.generate(),
+    val id: String = MemberIdGenerator.generate(),
 
     @Column(nullable = false, unique = true)
     var email: String,
@@ -32,18 +32,4 @@ class Member(
 
     @Column(name = "last_posted_at")
     var lastPostedAt: LocalDate? = null
-) : BaseTimeEntity(), Persistable<String> {
-
-    @Transient
-    private var isNew: Boolean = true
-
-    override fun getId(): String = mid
-
-    override fun isNew(): Boolean = isNew
-
-    @PostLoad
-    @PostPersist
-    fun markNotNew() {
-        isNew = false
-    }
-}
+) : BaseTimeEntity()

@@ -42,7 +42,7 @@ object MemberDto {
         companion object {
             fun from(member: Member): SignupResponse {
                 return SignupResponse(
-                    mid = member.mid,
+                    mid = member.id,
                     email = member.email,
                     nickname = member.nickname,
                     myEmoji = member.myEmoji

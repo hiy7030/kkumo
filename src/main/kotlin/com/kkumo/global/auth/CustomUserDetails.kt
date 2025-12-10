@@ -24,5 +24,5 @@ class CustomUserDetails(
 
     override fun isEnabled(): Boolean = true
 
-    fun getMemberId(): String = member.mid
+    fun getMemberId(): String = member.id
 }
