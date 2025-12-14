@@ -85,18 +85,22 @@
 - **도구:** JUnit5 + Mockk.
 
 ## 5. UI/UX Design Guidelines (KKUMO Design System)
-**Core Concept:** "Simplicity, Pastel, Soft, Cute" (Main Symbol: 👑 Crown)
+**Core Concept:** "Retro, Warm, Soft, Cute" (Main Symbol: 👑 Crown)
 
-### Color Palette (Tailwind CSS)
-- **Background:** `bg-sky-50` (Page Main), `bg-white` (Card/Container).
-- **Accent/Button:** `bg-yellow-300` (Default), `bg-yellow-400` (Hover), `text-yellow-900` (Text for readability).
-- **Text:** `text-gray-800` (Headings), `text-gray-600` (Body), `text-red-500` (Error).
+### Color Palette (Custom Hex Codes)
+*Tailwind의 기본 컬러 대신 아래의 Hex Code를 Arbitrary Value(`[]`)로 반드시 사용할 것.*
+- **Background:** `bg-[#FCF6D9]` (Page Main - Warm Cream), `bg-white` (Card/Container).
+- **Primary Action (CTA):** `bg-[#CF4B00]` (Burnt Orange), `hover:bg-[#B03E00]`, `text-white`.
+- **Main Accent:** `text-[#9CC6DB]` (Sky Blue), `focus:ring-[#9CC6DB]` (Input Focus Ring).
+- **Sub/Support:** `text-[#DDBA7D]` (Muted Gold) for secondary borders or subtitles.
+- **Text:** `text-gray-800` (Headings), `text-gray-600` (Body), `text-[#CF4B00]` (Error/Highlight).
 
 ### Component Style
 - **Shape:** All UI elements must use **Rounded Corners**.
     - Containers/Cards: `rounded-3xl`, `shadow-lg`.
-    - Inputs/Buttons: `rounded-xl` or `rounded-2xl`.
+    - Inputs/Buttons: `rounded-xl`.
 - **Logo:** Simple Crown Emoji (`👑`) centered at the top (`text-6xl`).
+- **Input Focus:** `focus:ring-2 focus:ring-[#9CC6DB]` (Blue Ring), `border-gray-300`.
 
 ### Interaction Patterns (Hybrid Architecture)
 - **View Navigation:** Standard `GET` requests returning Thymeleaf templates.
