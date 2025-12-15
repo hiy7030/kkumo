@@ -6,101 +6,102 @@
     <title>KKUMO 이메일 인증</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background-color: #FCF6D9;">
-    <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #FCF6D9; padding: 40px 20px;">
-        <tr>
-            <td align="center" style="padding: 0;">
-                <!-- Main Card Container -->
-                <table role="presentation" style="max-width: 480px; width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 24px; border: 4px solid #9CC6DB; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
-                    <!-- Logo Section -->
-                    <tr>
-                        <td align="center" style="padding: 40px 40px 20px 40px;">
-                            <div style="font-size: 64px; line-height: 1; margin-bottom: 16px;">👑</div>
-                            <h1 style="margin: 0; color: #333333; font-size: 28px; font-weight: bold; letter-spacing: -0.5px;">KKUMO 인증번호 안내</h1>
-                        </td>
-                    </tr>
 
-                    <!-- Message Section -->
-                    <tr>
-                        <td style="padding: 0 40px 30px 40px;">
-                            <p style="margin: 0 0 20px 0; color: #666666; font-size: 16px; line-height: 1.6; text-align: center;">
-                                안녕하세요! 꾸모에 오신 것을 환영합니다.<br>
-                                아래 인증번호를 입력하여 가입을 완료해주세요.
+<table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #FCF6D9;">
+
+    <tr>
+        <td height="80" style="font-size: 80px; line-height: 80px;">&nbsp;</td>
+    </tr>
+
+    <tr>
+        <td align="center" style="padding: 0 20px;">
+            <table role="presentation" style="max-width: 480px; width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 24px; border: 4px solid #9CC6DB; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
+                <tr>
+                    <td align="center" style="padding: 40px 40px 20px 40px;">
+                        <div style="font-size: 64px; line-height: 1; margin-bottom: 16px;">👑</div>
+                        <h1 style="margin: 0; color: #333333; font-size: 28px; font-weight: bold; letter-spacing: -0.5px;">KKUMO 인증번호 안내</h1>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding: 0 40px 30px 40px;">
+                        <p style="margin: 0 0 20px 0; color: #666666; font-size: 16px; line-height: 1.6; text-align: center;">
+                            안녕하세요! 꾸모에 오신 것을 환영합니다.<br>
+                            아래 인증번호를 입력하여 가입을 완료해주세요.
+                        </p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding: 0 40px 30px 40px;">
+                        <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #FCF6D9; border-radius: 16px; border: 2px dashed #DDBA7D; padding: 32px;">
+                            <tr>
+                                <td align="center">
+                                    <div style="color: #CF4B00; font-size: 40px; font-weight: bold; letter-spacing: 8px; font-family: 'Courier New', monospace;" th:text="${code}">
+                                        123456
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding: 0 40px 30px 40px;">
+                        <div style="background-color: #FFF3E0; border-left: 4px solid #CF4B00; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                            <p style="margin: 0; color: #CF4B00; font-size: 14px; font-weight: 600; line-height: 1.5;">
+                                ⏰ 이 인증번호는 <strong>3분간</strong> 유효합니다.
                             </p>
-                        </td>
-                    </tr>
+                        </div>
+                    </td>
+                </tr>
 
-                    <!-- Verification Code Box -->
-                    <tr>
-                        <td style="padding: 0 40px 30px 40px;">
-                            <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #FCF6D9; border-radius: 16px; border: 2px dashed #DDBA7D; padding: 32px;">
-                                <tr>
-                                    <td align="center">
-                                        <div style="color: #CF4B00; font-size: 40px; font-weight: bold; letter-spacing: 8px; font-family: 'Courier New', monospace;" th:text="${code}">
-                                            123456
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
+                <tr>
+                    <td style="padding: 0 40px 40px 40px;">
+                        <div style="background-color: #F8F9FA; border-radius: 12px; padding: 20px;">
+                            <p style="margin: 0 0 12px 0; color: #333333; font-size: 14px; font-weight: bold;">📌 이용 안내</p>
+                            <ul style="margin: 0; padding-left: 20px; color: #666666; font-size: 13px; line-height: 1.8;">
+                                <li>회원가입 페이지에서 위 인증번호를 입력해주세요.</li>
+                                <li>인증번호는 3분 후 자동으로 만료됩니다.</li>
+                                <li>본인이 요청하지 않았다면 이 메일을 무시하세요.</li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
 
-                    <!-- Timer Warning -->
-                    <tr>
-                        <td style="padding: 0 40px 30px 40px;">
-                            <div style="background-color: #FFF3E0; border-left: 4px solid #CF4B00; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-                                <p style="margin: 0; color: #CF4B00; font-size: 14px; font-weight: 600; line-height: 1.5;">
-                                    ⏰ 이 인증번호는 <strong>3분간</strong> 유효합니다.
-                                </p>
-                            </div>
-                        </td>
-                    </tr>
+                <tr>
+                    <td style="padding: 0 40px;">
+                        <hr style="border: none; border-top: 1px solid #EEEEEE; margin: 0 0 30px 0;">
+                    </td>
+                </tr>
 
-                    <!-- Instructions -->
-                    <tr>
-                        <td style="padding: 0 40px 40px 40px;">
-                            <div style="background-color: #F8F9FA; border-radius: 12px; padding: 20px;">
-                                <p style="margin: 0 0 12px 0; color: #333333; font-size: 14px; font-weight: bold;">📌 이용 안내</p>
-                                <ul style="margin: 0; padding-left: 20px; color: #666666; font-size: 13px; line-height: 1.8;">
-                                    <li>회원가입 페이지에서 위 인증번호를 입력해주세요.</li>
-                                    <li>인증번호는 3분 후 자동으로 만료됩니다.</li>
-                                    <li>본인이 요청하지 않았다면 이 메일을 무시하세요.</li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
+                <tr>
+                    <td align="center" style="padding: 0 40px 40px 40px;">
+                        <p style="margin: 0 0 8px 0; color: #999999; font-size: 12px; line-height: 1.6;">
+                            본 메일은 발신 전용입니다.
+                        </p>
+                        <p style="margin: 0; color: #CCCCCC; font-size: 11px;">
+                            © 2025 KKUMO. All rights reserved.
+                        </p>
+                    </td>
+                </tr>
+            </table>
 
-                    <!-- Divider -->
-                    <tr>
-                        <td style="padding: 0 40px;">
-                            <hr style="border: none; border-top: 1px solid #EEEEEE; margin: 0 0 30px 0;">
-                        </td>
-                    </tr>
+            <table role="presentation" style="margin-top: 20px;">
+                <tr>
+                    <td align="center">
+                        <p style="margin: 0; color: #AAAAAA; font-size: 11px;">
+                            매일 기록하고, 왕관을 유지하세요 👑
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
 
-                    <!-- Footer -->
-                    <tr>
-                        <td align="center" style="padding: 0 40px 40px 40px;">
-                            <p style="margin: 0 0 8px 0; color: #999999; font-size: 12px; line-height: 1.6;">
-                                본 메일은 발신 전용입니다.
-                            </p>
-                            <p style="margin: 0; color: #CCCCCC; font-size: 11px;">
-                                © 2025 KKUMO. All rights reserved.
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-
-                <!-- Bottom Spacing -->
-                <table role="presentation" style="margin-top: 20px;">
-                    <tr>
-                        <td align="center">
-                            <p style="margin: 0; color: #AAAAAA; font-size: 11px;">
-                                매일 기록하고, 왕관을 모으세요 👑
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+    <tr>
+        <td height="80" style="font-size: 80px; line-height: 80px;">&nbsp;</td>
+    </tr>
+</table>
 </body>
 </html>
