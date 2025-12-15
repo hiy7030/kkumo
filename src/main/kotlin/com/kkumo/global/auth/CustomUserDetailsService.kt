@@ -1,6 +1,6 @@
 package com.kkumo.global.auth
 
-import com.kkumo.domain.member.MemberRepository
+import com.kkumo.domain.member.repository.MemberRepository
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException

@@ -1,5 +1,6 @@
-package com.kkumo.domain.post
+package com.kkumo.domain.post.repository
 
+import com.kkumo.domain.post.Post
 import org.springframework.data.jpa.repository.JpaRepository
 import java.time.LocalDate
 

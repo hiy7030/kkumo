@@ -25,7 +25,6 @@
 
 ## 2. 아키텍처 및 패키지 구조
 **도메인 중심 아키텍처 (Domain-oriented / Package-by-feature)** 를 엄격히 준수합니다.
-*계층형 구조(root에 controller/service 패키지 배치)를 사용하지 마세요.*
 
 - **Base Package:** `com.kkumo`
 - **Structure:**

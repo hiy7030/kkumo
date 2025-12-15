@@ -64,6 +64,7 @@ class SecurityConfig {
 
                 // 이메일 인증 허용 (회원가입 시 필요)
                 authorize("/kkumo/v1/mail/**", permitAll)
+                authorize("/kkumo/v1/home/**", permitAll)
 
                 // 테스트 API 허용
                 authorize("/kkumo/v1/hello", permitAll)

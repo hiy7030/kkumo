@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>홈 - KKUMO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#FCF6D9] min-h-screen">
+
+    <!-- Header (Navigation) -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <!-- Left: Logo -->
+            <div class="flex items-center space-x-2">
+                <span class="text-4xl">👑</span>
+                <h1 class="text-2xl font-bold text-gray-800">KKUMO</h1>
+            </div>
+
+            <!-- Right: Report Buttons -->
+            <div class="flex items-center space-x-3">
+                <!-- 내 기록(달력) 보기 -->
+                <a
+                    href="/kkumo/v1/reports/my"
+                    class="bg-white border-2 border-[#9CC6DB] text-2xl w-12 h-12 rounded-full flex items-center justify-center shadow-sm hover:bg-[#9CC6DB] hover:scale-110 transition duration-200"
+                    title="내 기록 보기">
+                    📅
+                </a>
+
+                <!-- 생존 지도(매트릭스) 보기 -->
+                <a
+                    href="/kkumo/v1/reports/all"
+                    class="bg-white border-2 border-[#9CC6DB] text-2xl w-12 h-12 rounded-full flex items-center justify-center shadow-sm hover:bg-[#9CC6DB] hover:scale-110 transition duration-200"
+                    title="생존 지도 보기">
+                    📊
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Hero Section (My Mission) -->
+        <section class="bg-white border-4 border-[#9CC6DB] rounded-3xl shadow-xl p-8 md:p-12 text-center mb-12">
+
+            <!-- State 1: 기록 전 (hasPostedToday = false) -->
+            <div th:if="${!hasPostedToday}">
+                <!-- Timer -->
+                <div class="mb-6">
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-3">
+                        오늘 마감까지
+                    </h2>
+                    <div id="timer" class="text-5xl md:text-7xl font-bold text-[#CF4B00]">
+                        00:00:00
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <button
+                    onclick="location.href='/kkumo/v1/post/create'"
+                    class="bg-[#CF4B00] hover:bg-[#B03E00] text-white text-xl md:text-2xl font-bold py-6 px-12 rounded-xl shadow-lg transform transition hover:scale-105 duration-200 animate-pulse">
+                    📸 오늘의 생존 신고
+                </button>
+            </div>
+
+            <!-- State 2: 기록 후 (hasPostedToday = true) -->
+            <div th:if="${hasPostedToday}">
+                <!-- Badge -->
+                <div class="mb-6">
+                    <div class="inline-flex items-center justify-center bg-[#CF4B00] text-white px-6 py-3 rounded-full shadow-lg mb-4">
+                        <span class="text-3xl mr-2">👑</span>
+                        <span class="text-xl font-bold">오늘 인증 완료!</span>
+                    </div>
+                    <p class="text-lg font-semibold text-gray-700">
+                        <span th:text="${currentStreak}">12</span>일 연속 성공 중이에요!
+                    </p>
+                </div>
+
+                <!-- My Post Card -->
+                <div class="inline-block bg-white rounded-2xl shadow-2xl p-4 transform hover:scale-105 transition duration-300">
+                    <img
+                        th:src="${myPost.imageUrl}"
+                        alt="My Post"
+                        class="w-full max-w-md rounded-xl mb-4 object-cover aspect-square"
+                    />
+                    <div class="flex items-center justify-center space-x-2">
+                        <span class="text-3xl" th:text="${myPost.emoji}">😊</span>
+                        <span class="font-bold text-gray-800" th:text="${myPost.nickname}">나</span>
+                        <span class="text-gray-600" th:text="${myPost.comment}">오늘도 열심히!</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Feed Section (Survivor Feed) -->
+        <section>
+            <!-- Title -->
+            <div class="text-center mb-8">
+                <h3 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+                    현재 <span class="text-[#CF4B00]" th:text="${survivorCount}">10</span>명이 생존했어요!
+                </h3>
+                <p class="text-gray-600 text-lg">리액션을 남겨보세요 👇</p>
+            </div>
+
+            <!-- Feed Grid (Masonry Layout) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div
+                    th:each="item : ${feedList}"
+                    th:data-feed-id="${item.id}"
+                    class="bg-white rounded-xl shadow-md overflow-hidden transform transition duration-300 hover:shadow-2xl hover:scale-105">
+
+                    <!-- Image -->
+                    <img
+                        th:src="${item.imageUrl}"
+                        alt="Feed Image"
+                        class="w-full object-cover aspect-square"
+                    />
+
+                    <!-- Content -->
+                    <div class="p-4">
+                        <!-- Author & Comment -->
+                        <div class="flex items-center space-x-2 mb-3">
+                            <span class="text-2xl" th:text="${item.emoji}">😊</span>
+                            <div class="flex-1">
+                                <p class="font-bold text-gray-800" th:text="${item.nickname}">닉네임</p>
+                                <p class="text-sm text-gray-600 truncate" th:text="${item.comment}">댓글</p>
+                            </div>
+                        </div>
+
+                        <!-- Reaction Bar -->
+                        <div class="flex items-center justify-around border-t border-gray-200 pt-3">
+                            <!-- Fire -->
+                            <button
+                                class="reaction-btn flex flex-col items-center space-y-1 hover:scale-125 transition"
+                                th:data-type="fire"
+                                th:data-feed-id="${item.id}">
+                                <span class="text-2xl">🔥</span>
+                                <span class="reaction-count text-xs font-semibold text-gray-600" th:text="${item.reactions['fire']}">0</span>
+                            </button>
+
+                            <!-- Heart -->
+                            <button
+                                class="reaction-btn flex flex-col items-center space-y-1 hover:scale-125 transition"
+                                th:data-type="heart"
+                                th:data-feed-id="${item.id}">
+                                <span class="text-2xl">❤️</span>
+                                <span class="reaction-count text-xs font-semibold text-gray-600" th:text="${item.reactions['heart']}">0</span>
+                            </button>
+
+                            <!-- Clap -->
+                            <button
+                                class="reaction-btn flex flex-col items-center space-y-1 hover:scale-125 transition"
+                                th:data-type="clap"
+                                th:data-feed-id="${item.id}">
+                                <span class="text-2xl">👏</span>
+                                <span class="reaction-count text-xs font-semibold text-gray-600" th:text="${item.reactions['clap']}">0</span>
+                            </button>
+
+                            <!-- Laugh -->
+                            <button
+                                class="reaction-btn flex flex-col items-center space-y-1 hover:scale-125 transition"
+                                th:data-type="laugh"
+                                th:data-feed-id="${item.id}">
+                                <span class="text-2xl">🤣</span>
+                                <span class="reaction-count text-xs font-semibold text-gray-600" th:text="${item.reactions['laugh']}">0</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JavaScript -->
+    <script>
+        // ==================== Countdown Timer ====================
+        function updateTimer() {
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setHours(24, 0, 0, 0); // 자정 설정
+
+            const diff = tomorrow - now; // 밀리초 차이
+
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            const timerElement = document.getElementById('timer');
+            if (timerElement) {
+                timerElement.textContent =
+                    String(hours).padStart(2, '0') + ':' +
+                    String(minutes).padStart(2, '0') + ':' +
+                    String(seconds).padStart(2, '0');
+            }
+        }
+
+        // 페이지 로드 시 즉시 실행
+        updateTimer();
+
+        // 1초마다 갱신
+        setInterval(updateTimer, 1000);
+
+
+        // ==================== Reaction Click Handler ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            const reactionButtons = document.querySelectorAll('.reaction-btn');
+
+            reactionButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const reactionType = this.getAttribute('data-type');
+                    const feedId = this.getAttribute('data-feed-id');
+                    const countElement = this.querySelector('.reaction-count');
+
+                    // 현재 카운트 가져오기
+                    let currentCount = parseInt(countElement.textContent);
+
+                    // 카운트 증가
+                    currentCount += 1;
+
+                    // UI 업데이트
+                    countElement.textContent = currentCount;
+
+                    // 애니메이션 효과
+                    countElement.classList.add('text-[#CF4B00]', 'font-bold');
+                    setTimeout(() => {
+                        countElement.classList.remove('text-[#CF4B00]', 'font-bold');
+                    }, 300);
+
+                    // TODO: 실제 API 호출은 추후 구현
+                    console.log(`Reaction clicked: feedId=${feedId}, type=${reactionType}, newCount=${currentCount}`);
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
