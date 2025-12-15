@@ -1,5 +1,6 @@
 package com.kkumo.domain.member
 
+import com.kkumo.domain.member.dto.MemberIdGenerator
 import com.kkumo.global.common.BaseTimeEntity
 import jakarta.persistence.*
 import org.springframework.data.domain.Persistable

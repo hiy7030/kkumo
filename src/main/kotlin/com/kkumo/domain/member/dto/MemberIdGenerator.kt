@@ -1,4 +1,4 @@
-package com.kkumo.domain.member
+package com.kkumo.domain.member.dto
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

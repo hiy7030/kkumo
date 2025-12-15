@@ -1,5 +1,6 @@
-package com.kkumo.domain.member
+package com.kkumo.domain.member.controller
 
+import com.kkumo.domain.member.service.MemberService
 import com.kkumo.domain.member.dto.MemberDto
 import com.kkumo.global.annotation.KKumoRestController
 import com.kkumo.global.error.ApiResponse

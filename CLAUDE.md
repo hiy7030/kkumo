@@ -84,6 +84,50 @@
 - **커버리지:** 전체 커버리지보다 **핵심 로직(Streak, 제약조건)** 검증에 집중.
 - **도구:** JUnit5 + Mockk.
 
+### Controller Annotation Strategy (Strict Rule)
+모든 컨트롤러는 표준 Spring 어노테이션(`@RestController`, `@Controller`) 대신 **프로젝트 전용 커스텀 어노테이션**을 사용해야 한다.
+모든 요청은 기본적으로 `/kkumo/v1` 경로를 상속받는다.
+
+#### A. REST API (JSON Response)
+- **Annotation:** `@KKumoRestController`
+- **Usage:** 데이터 통신, API 엔드포인트 구현 시 사용.
+- **Definition:**
+  ```kotlin
+  @Target(AnnotationTarget.CLASS)
+  @Retention(AnnotationRetention.RUNTIME)
+  @RestController
+  @RequestMapping("/kkumo/v1")
+  annotation class KKumoRestController
+  
+#### B. Web View (HTML/Thymeleaf Response)
+- **Annotation:** `@KKumoWebController`
+- **Usage:** 화면(View)을 반환하는 페이지 컨트롤러 구현 시 사용.
+- **Definition:**
+  ```kotlin
+  @Target(AnnotationTarget.CLASS)
+  @Retention(AnnotationRetention.RUNTIME)
+  @Controller
+  @RequestMapping("/kkumo/v1")
+  annotation class KKumoWebController
+  
+#### C. Implementation Example
+- Case 1: API (Member Logic)
+- 
+- 
+   ```kotlin
+   @KKumoRestController
+   class MemberApiController(private val memberService: MemberService) {
+   @PostMapping("/members")
+   fun signup(@RequestBody request: SignupRequest) { ... }
+   }
+- Case 2: View (Page Rendering)
+   ```kotlin
+  @KKumoWebController
+  class MemberViewController {
+  @GetMapping("/login")
+  fun loginPage(): String = "login"
+  }
+
 ## 5. UI/UX Design Guidelines (KKUMO Design System)
 **Core Concept:** "Retro, Warm, Soft, Cute" (Main Symbol: 👑 Crown)
 

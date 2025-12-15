@@ -1,5 +1,6 @@
-package com.kkumo.domain.member
+package com.kkumo.domain.member.service
 
+import com.kkumo.domain.member.MemberRepository
 import com.kkumo.domain.member.dto.MemberDto
 import com.kkumo.global.error.BusinessException
 import com.kkumo.global.error.ErrorCode

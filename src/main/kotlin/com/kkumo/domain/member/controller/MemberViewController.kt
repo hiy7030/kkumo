@@ -1,4 +1,4 @@
-package com.kkumo.domain.member
+package com.kkumo.domain.member.controller
 
 import com.kkumo.global.annotation.KKumoWebController
 import org.springframework.stereotype.Controller

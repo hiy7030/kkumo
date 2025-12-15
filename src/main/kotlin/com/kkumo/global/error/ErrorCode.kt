@@ -14,6 +14,11 @@ enum class ErrorCode(val message: String) {
 
     REACTION_NOT_FOUND("리액션을 찾을 수 없습니다."),
 
+    VERIFICATION_CODE_NOT_FOUND("인증번호를 찾을 수 없습니다. 먼저 인증번호를 요청해주세요."),
+    VERIFICATION_CODE_EXPIRED("인증번호가 만료되었습니다. 다시 요청해주세요."),
+    VERIFICATION_CODE_MISMATCH("인증번호가 일치하지 않습니다."),
+    EMAIL_SEND_FAILED("이메일 전송에 실패했습니다."),
+
     INVALID_INPUT("잘못된 입력입니다."),
     UNAUTHORIZED("인증이 필요합니다."),
     FORBIDDEN("권한이 없습니다."),
