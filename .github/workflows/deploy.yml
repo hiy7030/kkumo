@@ -33,6 +33,10 @@ jobs:
                   secret: DB_USERNAME
                 - name: DB_PASSWORD
                   secret: DB_PASSWORD
+                - name: MAIL_USERNAME
+                  secret: MAIL_USERNAME
+                - name: MAIL_PASSWORD
+                  secret: MAIL_PASSWORD
             context:
               git:
                 url: git@github.com:${{ github.repository }}.git
