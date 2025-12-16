@@ -45,6 +45,8 @@ jobs:
                   secret: S3_SECRET_KEY
                 - name: S3_REGION
                   secret: S3_REGION
+                - name: S3_IMAGE_URL
+                  secret: S3_IMAGE_URL
             context:
               git:
                 url: git@github.com:${{ github.repository }}.git

@@ -6,10 +6,10 @@
     <title>회원가입 - KKUMO</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[#FCF6D9] min-h-screen flex items-center justify-center p-4">
-<div class="bg-white rounded-3xl shadow-lg p-8 max-w-md w-full">
+<body class="bg-white min-h-screen flex items-center justify-center p-4">
+<div class="bg-white rounded-2xl shadow-sm p-8 max-w-md w-full border border-[#DBDFEA]">
     <div class="text-center mb-8">
-        <div class="text-6xl mb-4">👑</div>
+        <div class="text-4xl mb-4">👑</div>
         <h1 class="text-3xl font-bold text-gray-800">KKUMO 가입</h1>
         <p class="text-gray-600 mt-2">나만의 기록 습관을 시작하세요</p>
     </div>
@@ -18,8 +18,8 @@
         <div>
             <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">이메일</label>
             <div class="flex gap-2">
-                <input type="email" id="email" name="email" required placeholder="example@email.com" class="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#9CC6DB] focus:border-transparent outline-none transition" />
-                <button type="button" id="sendCodeBtn" class="bg-[#9CC6DB] hover:bg-[#8AB5CA] text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 whitespace-nowrap">
+                <input type="email" id="email" name="email" required placeholder="example@email.com" class="flex-1 px-4 py-3 rounded-xl border border-[#DBDFEA] focus:ring-2 focus:ring-[#ACB1D6] focus:border-[#8294C4] outline-none transition" />
+                <button type="button" id="sendCodeBtn" class="bg-[#ACB1D6] hover:bg-[#9BA3C4] text-white font-semibold px-6 py-3 rounded-full transition-colors duration-200 whitespace-nowrap">
                     인증번호 전송
                 </button>
             </div>
@@ -29,46 +29,46 @@
         <div id="verificationSection" class="hidden">
             <label for="verificationCode" class="block text-sm font-semibold text-gray-700 mb-2">인증번호</label>
             <div class="flex gap-2">
-                <input type="text" id="verificationCode" name="verificationCode" placeholder="6자리 인증번호" maxlength="6" class="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#9CC6DB] focus:border-transparent outline-none transition" />
-                <button type="button" id="verifyCodeBtn" class="bg-[#CF4B00] hover:bg-[#B03E00] text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 whitespace-nowrap">
+                <input type="text" id="verificationCode" name="verificationCode" placeholder="6자리 인증번호" maxlength="6" class="flex-1 px-4 py-3 rounded-xl border border-[#DBDFEA] focus:ring-2 focus:ring-[#ACB1D6] focus:border-[#8294C4] outline-none transition" />
+                <button type="button" id="verifyCodeBtn" class="bg-[#8294C4] hover:bg-[#6E80B0] text-white font-semibold px-6 py-3 rounded-full transition-colors duration-200 whitespace-nowrap">
                     확인
                 </button>
             </div>
             <div class="flex justify-between items-center mt-2">
                 <p id="verificationMessage" class="text-sm"></p>
-                <p id="timer" class="text-sm font-semibold text-[#CF4B00]"></p>
+                <p id="timer" class="text-sm font-semibold text-[#8294C4]"></p>
             </div>
         </div>
 
         <div>
             <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">비밀번호 (최소 8자)</label>
-            <input type="password" id="password" name="password" required minlength="8" placeholder="비밀번호를 입력하세요" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#9CC6DB] focus:border-transparent outline-none transition" />
+            <input type="password" id="password" name="password" required minlength="8" placeholder="비밀번호를 입력하세요" class="w-full px-4 py-3 rounded-xl border border-[#DBDFEA] focus:ring-2 focus:ring-[#ACB1D6] focus:border-[#8294C4] outline-none transition" />
         </div>
 
         <div>
             <label for="nickname" class="block text-sm font-semibold text-gray-700 mb-2">닉네임 (2~20자)</label>
-            <input type="text" id="nickname" name="nickname" required minlength="2" maxlength="20" placeholder="닉네임을 입력하세요" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#9CC6DB] focus:border-transparent outline-none transition" />
+            <input type="text" id="nickname" name="nickname" required minlength="2" maxlength="20" placeholder="닉네임을 입력하세요" class="w-full px-4 py-3 rounded-xl border border-[#DBDFEA] focus:ring-2 focus:ring-[#ACB1D6] focus:border-[#8294C4] outline-none transition" />
         </div>
 
         <div class="mb-6 relative">
             <label class="block text-sm font-semibold text-gray-700 mb-2">나만의 이모지 선택 (👑 제외)</label>
             <div class="flex items-center gap-3">
-                <button type="button" id="emojiTriggerBtn" class="w-full bg-white border-2 border-gray-200 text-gray-500 hover:border-[#9CC6DB] hover:text-[#9CC6DB] font-medium py-3 px-4 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-sm text-lg">
+                <button type="button" id="emojiTriggerBtn" class="w-full bg-white border-2 border-[#DBDFEA] text-gray-500 hover:border-[#8294C4] hover:text-[#8294C4] font-medium py-3 px-4 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-sm text-lg">
                     <span id="btnIcon">😀</span>
                     <span id="emojiBtnText">이모지를 골라보세요</span>
                 </button>
                 <input type="hidden" id="myEmoji" name="myEmoji" required />
             </div>
-            <p class="text-xs text-gray-400 mt-1 ml-1">* 왕관(👑)은 꾸모 공식 로고라 사용할 수 없어요.</p>
+            <p class="text-xs text-[#ACB1D6] mt-1 ml-1">* 왕관(👑)은 꾸모 공식 로고라 사용할 수 없어요.</p>
         </div>
 
-        <button type="submit" class="w-full bg-[#CF4B00] hover:bg-[#B03E00] text-white font-bold py-3 rounded-lg transition-colors duration-200">
+        <button type="submit" class="w-full bg-[#8294C4] hover:bg-[#6E80B0] text-white font-bold py-3 rounded-full transition-colors duration-200">
             가입하기
         </button>
     </form>
 
     <div class="mt-6 text-center">
-        <p class="text-gray-600 text-sm">이미 회원이신가요? <a href="/login" class="text-[#9CC6DB] hover:text-[#9CC6DB] font-semibold">로그인</a></p>
+        <p class="text-gray-600 text-sm">이미 회원이신가요? <a href="/login" class="text-[#8294C4] hover:text-[#6E80B0] font-semibold">로그인</a></p>
     </div>
 </div>
 
@@ -115,8 +115,8 @@
 
         btnIcon.innerText = selectedEmoji;
         btnText.innerText = "선택 완료!";
-        triggerBtn.classList.add("border-[#9CC6DB]", "bg-[#FCF6D9]", "text-gray-900");
-        triggerBtn.classList.remove("border-gray-200", "text-gray-500");
+        triggerBtn.classList.add("border-[#8294C4]", "bg-[#FFEAD2]", "text-gray-900");
+        triggerBtn.classList.remove("border-[#DBDFEA]", "text-gray-500");
 
         hiddenInput.value = selectedEmoji;
     });
@@ -190,7 +190,7 @@
                 isEmailVerified = true;
                 clearInterval(timerInterval);
                 verificationMessage.textContent = '✅ 인증되었습니다';
-                verificationMessage.classList.add('text-[#CF4B00]', 'font-semibold');
+                verificationMessage.classList.add('text-[#8294C4]', 'font-semibold');
                 timerElement.textContent = '';
                 verificationCode.disabled = true;
                 verifyCodeBtn.disabled = true;

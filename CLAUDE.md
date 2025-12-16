@@ -128,22 +128,41 @@
   }
 
 ## 5. UI/UX Design Guidelines (KKUMO Design System)
-**Core Concept:** "Retro, Warm, Soft, Cute" (Main Symbol: 👑 Crown)
+**Core Concept:** Modern & Emotional(블루/화이트/크림 (Main Symbol: 👑 Crown)
 
 ### Color Palette (Custom Hex Codes)
 *Tailwind의 기본 컬러 대신 아래의 Hex Code를 Arbitrary Value(`[]`)로 반드시 사용할 것.*
-- **Background:** `bg-[#FCF6D9]` (Page Main - Warm Cream), `bg-white` (Card/Container).
-- **Primary Action (CTA):** `bg-[#CF4B00]` (Burnt Orange), `hover:bg-[#B03E00]`, `text-white`.
-- **Main Accent:** `text-[#9CC6DB]` (Sky Blue), `focus:ring-[#9CC6DB]` (Input Focus Ring).
-- **Sub/Support:** `text-[#DDBA7D]` (Muted Gold) for secondary borders or subtitles.
-- **Text:** `text-gray-800` (Headings), `text-gray-600` (Body), `text-[#CF4B00]` (Error/Highlight).
+- **Background:** `bg-white` (Main Page - Clean App View),`bg-[#DBDFEA]` (Sub Background / Borders / Separators - Mist Blue).
+- **Primary Action (CTA):** `bg-[#8294C4]` (Cool Blue), `hover:bg-[#6E80B0]`, `text-white`, 가장 중요한 버튼(기록하기, 저장 등)에 사용.
+- **Main Accent:** `text-[#8294C4]` (Active Icons, Links), `focus:ring-[#ACB1D6]` (Input Focus Ring - Soft Lavender).
+- **Sub/Support:** `text-[#ACB1D6]` (Muted Text, Placeholder, Inactive Icons), `border-[#DBDFEA]` (Light Dividers).
+- **Point (Highlight)** `bg-[#FFEAD2]` (Warm Cream), 프로필 이미지 배경이나, 강조하고 싶은 작은 요소에 사용하여 차가운 블루 톤에 따뜻함을 한 방울 더함.
+- **Text:** `text-slate-800` (Headings - for readability), `text-slate-500` (Body), `text-[#8294C4]` (Brand/Point Text).
 
 ### Component Style
-- **Shape:** All UI elements must use **Rounded Corners**.
-    - Containers/Cards: `rounded-3xl`, `shadow-lg`.
-    - Inputs/Buttons: `rounded-xl`.
-- **Logo:** Simple Crown Emoji (`👑`) centered at the top (`text-6xl`).
-- **Input Focus:** `focus:ring-2 focus:ring-[#9CC6DB]` (Blue Ring), `border-gray-300`.
+#### **Shape:**
+- **Primary Buttons:** `rounded-full` (Pill Shape)
+    - 트위터 스타일의 둥근 알약 모양 버튼.
+- **Containers / Cards:** `rounded-2xl`
+    - 너무 과하지 않고 세련된 느낌의 라운드 처리.
+- **Inputs / Images:** `rounded-xl`
+    - 부드러운 모서리 마감.
+#### **Logo:** 
+- **Style:** Sticky Header에 위치하며 심플함을 강조.
+- **Size:** `text-4xl`
+- **Icon:** Crown Emoji (`👑`)
+#### **Input Fields**
+- **Default:** `border border-[#DBDFEA]`, `bg-white`, `rounded-xl`.
+- **Focus State:**
+    - `outline-none` (브라우저 기본 아웃라인 제거).
+    - `ring-2 ring-[#ACB1D6]` (부드러운 포커스 링).
+    - `border-[#8294C4]` (진한 블루 테두리).
+
+#### **Shadows & Depth**
+- **Default Shadow:** `shadow-sm`
+    - 플랫한 디자인을 유지하되, 아주 얕은 깊이감만 부여.
+- **Floating Buttons (FAB):** `shadow-lg`
+    - 화면 위에 떠 있는 버튼에만 강한 그림자 적용.
 
 ### Interaction Patterns (Hybrid Architecture)
 - **View Navigation:** Standard `GET` requests returning Thymeleaf templates.

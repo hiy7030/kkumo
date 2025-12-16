@@ -13,8 +13,8 @@ class R2ImageService(
     private val s3Client: S3Client,
     @Value("\${cloud.aws.s3.bucket}")
     private val bucketName: String,
-    @Value("\${cloud.aws.s3.endpoint}")
-    private val endpointUrl: String
+    @Value("\${cloud.aws.s3.publicUrl}")
+    private val publicUrl: String
 ): ImageService {
 
     override fun upload(file: MultipartFile): String {
@@ -44,6 +44,6 @@ class R2ImageService(
 
         // 4. 조회 가능한 Public URL 반환
         // 예: https://img.kkumo.com/a1b2c3d4.jpg
-        return "$endpointUrl/kkumo/$savedFileName"
+        return "$publicUrl/kkumo/$savedFileName"
     }
 }

@@ -1,65 +1,66 @@
-# 🎨 KKUMO (꾸모) Design System
+# DESIGN.md
 
-이 문서는 꾸모 프로젝트의 UI/UX 디자인 원칙과 Tailwind CSS 스타일 가이드를 정의합니다.
-개발 시 이 규칙을 준수하여 통일감 있는 "레트로 & 웜(Retro & Warm)" 무드를 유지해야 합니다.
+## 1. Color Palette (Blue & Cream Theme)
+*Tailwind의 기본 컬러 대신 아래의 Hex Code를 Arbitrary Value(`[]`)로 사용하여 **감성적이고 차분한 블루 톤**을 구현할 것.*
 
-## 1. Design Concept
-- **Keywords:** `Retro`, `Warm`, `Soft`, `Cute`
-- **Main Symbol:** 👑 (Crown) - 심플하고 명확한 왕관 아이콘 사용.
-- **Vibe:** 따뜻한 크림색 배경에 차분한 블루와 강렬한 오렌지 포인트를 더해, 감성적이고 포근한 느낌을 줌.
+### Background
+- **Main Page:** `bg-white`
+  - 트위터(X)나 최신 앱처럼 깔끔하고 확장성 있는 화이트 배경.
+- **Sub / Border:** `bg-[#DBDFEA]`, `border-[#DBDFEA]` (Mist Blue)
+  - 배경과 콘텐츠를 은은하게 구분하는 구분선이나 보조 배경색.
 
----
+### Primary Action (CTA)
+- **Base:** `bg-[#8294C4]` (Cool Blue)
+  - 기록하기, 저장, 확인 등 가장 중요한 버튼.
+- **Hover:** `hover:bg-[#6E80B0]`
+- **Text:** `text-white`
 
-## 2. Color Palette
-Tailwind CSS 설정(`tailwind.config.js`)에 추가하거나 Arbitrary Value(`[]`)를 사용하여 적용합니다.
+### Main Accent & Focus
+- **Active Icons/Links:** `text-[#8294C4]`
+- **Input Focus Ring:** `focus:ring-[#ACB1D6]` (Soft Lavender)
+  - 입력창 포커스 시 부드러운 라벤더 색상의 링 효과.
+- **Active Border:** `focus:border-[#8294C4]`
 
-| Role | Color Name | Hex Code | Usage |
-| :--- | :--- | :--- | :--- |
-| **Main** | **Sky Blue** | `#9CC6DB` | 헤더, 주요 테두리, 아이콘 배경, 활성 탭 |
-| **Base** | **Warm Cream** | `#FCF6D9` | **웹페이지 전체 배경(`body`)**, 부드러운 분위기 조성 |
-| **Point** | **Burnt Orange** | `#CF4B00` | **주요 버튼(CTA)**, 강조 텍스트, 에러 메시지, 클릭 유도 |
-| **Sub** | **Muted Gold** | `#DDBA7D` | 보조 버튼, 구분선, 서브 텍스트, 왕관 아이콘 매칭 |
+### Sub / Support
+- **Muted Text:** `text-[#ACB1D6]`
+  - 비활성화된 버튼, 플레이스홀더, 보조 설명 텍스트.
+- **Inactive Icons:** `text-[#ACB1D6]`
 
-### Tailwind Usage Guide
-- **Backgrounds:**
-    - Page Body: `bg-[#FCF6D9]`
-    - Card/Container: `bg-white`
-- **Actions (Buttons):**
-    - Primary: `bg-[#CF4B00]` (Text: `text-white`)
-    - Hover: `hover:bg-[#B03E00]`
-- **Text:**
-    - Headings: `text-gray-800`
-    - Highlights/Error: `text-[#CF4B00]`
-    - Subtitles: `text-[#DDBA7D]` or `text-gray-500`
+### Point (Highlight)
+- **Accent Background:** `bg-[#FFEAD2]` (Warm Cream)
+  - **프로필 이미지 배경**, 배지, 혹은 차가운 블루 톤 사이에서 따뜻함을 주고 싶은 포인트 요소에 사용.
 
----
-
-## 3. Typography & Shape
-
-### Font Style
-- 기본적으로 Sans-serif를 사용하되, 가독성을 위해 굵기를 조절합니다.
-- **Title:** `font-bold` (강조가 필요할 때)
-- **Body:** `font-medium` or `font-normal`
-
-### Borders & Radius (Rounded)
-꾸모의 모든 UI 요소는 **둥근 모서리**를 가집니다. 각진 디자인(`rounded-none`)은 지양합니다.
-- **Card Container:** `rounded-3xl` (매우 둥글게, 부드러운 느낌)
-- **Button:** `rounded-xl`
-- **Input Field:** `rounded-lg`
-
-### Shadows & Effects
-- **Card:** `shadow-lg` (부드럽고 넓게 퍼지는 그림자)
-- **Input Focus:** `focus:ring-2 focus:ring-[#9CC6DB]` (포커스 시 메인 블루 컬러 링)
-- **Button Hover:** 색상 변경과 함께 약간의 `transform` 효과 권장.
+### Typography Colors
+- **Headings:** `text-slate-800` (가독성을 위한 진한 회색)
+- **Body:** `text-slate-600` (본문)
+- **Brand Text:** `text-[#8294C4]` (브랜드 컬러 강조 텍스트)
 
 ---
 
-## 4. UI Components Guide (Code Snippets)
+## 2. Component Style (Modern App-like)
 
-### A. Page Layout (Background)
-따뜻한 크림색 배경이 전체를 감싸고, 중앙에 흰색 카드가 위치합니다.
-```html
-<body class="bg-[#FCF6D9] min-h-screen flex items-center justify-center font-sans">
-    <div class="bg-white p-8 rounded-3xl shadow-lg w-full max-w-md">
-        </div>
-</body>
+### Shape & Radius
+- **Primary Buttons:** `rounded-full` (Pill Shape)
+  - 트위터 스타일의 둥근 알약 모양 버튼.
+- **Containers / Cards:** `rounded-2xl`
+  - 너무 과하지 않고 세련된 느낌의 라운드 처리.
+- **Inputs / Images:** `rounded-xl`
+  - 부드러운 모서리 마감.
+
+### Logo
+- **Style:** Sticky Header에 위치하며 심플함을 강조.
+- **Size:** `text-4xl`
+- **Icon:** Crown Emoji (`👑`)
+
+### Input Fields
+- **Default:** `border border-[#DBDFEA]`, `bg-white`, `rounded-xl`.
+- **Focus State:**
+  - `outline-none` (브라우저 기본 아웃라인 제거).
+  - `ring-2 ring-[#ACB1D6]` (부드러운 포커스 링).
+  - `border-[#8294C4]` (진한 블루 테두리).
+
+### Shadows & Depth
+- **Default Shadow:** `shadow-sm`
+  - 플랫한 디자인을 유지하되, 아주 얕은 깊이감만 부여.
+- **Floating Buttons (FAB):** `shadow-lg`
+  - 화면 위에 떠 있는 버튼에만 강한 그림자 적용.
