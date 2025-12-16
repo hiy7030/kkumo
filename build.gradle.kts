@@ -35,6 +35,8 @@ dependencies {
 	testImplementation("org.springframework.security:spring-security-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation(platform("software.amazon.awssdk:bom:2.29.0"))
+    implementation("software.amazon.awssdk:s3")
 }
 
 kotlin {

@@ -25,7 +25,7 @@ class Post(
     @JoinColumn(name = "member_id", nullable = false)
     val member: Member,
 
-    @Column(nullable = true, columnDefinition = "TEXT")
+    @Column(nullable = true, columnDefinition = "TEXT", length = 140)
     var content: String? = null,
 
     @Column(name = "image_url", nullable = false)
