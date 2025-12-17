@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -38,10 +39,17 @@
             </div>
         </div>
 
-        <!-- 홈 버튼 -->
-        <a href="/kkumo/v1/home"
+        <!-- 버튼: 로그인 상태에 따라 분기 -->
+        <!-- Case 1: 로그인된 유저 -->
+        <a sec:authorize="isAuthenticated()" href="/kkumo/v1/home"
            class="inline-block bg-[#8294C4] hover:bg-[#6E80B0] text-white font-bold px-6 py-3 rounded-full transition-colors duration-200">
             🏠 홈으로 돌아가기
+        </a>
+
+        <!-- Case 2: 비로그인 유저 -->
+        <a sec:authorize="isAnonymous()" href="/login"
+           class="inline-block bg-[#8294C4] hover:bg-[#6E80B0] text-white font-bold px-6 py-3 rounded-full transition-colors duration-200">
+            🔑 로그인하러 가기
         </a>
     </div>
 </body>

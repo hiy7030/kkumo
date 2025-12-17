@@ -136,7 +136,7 @@
 - **Primary Action (CTA):** `bg-[#8294C4]` (Cool Blue), `hover:bg-[#6E80B0]`, `text-white`, 가장 중요한 버튼(기록하기, 저장 등)에 사용.
 - **Main Accent:** `text-[#8294C4]` (Active Icons, Links), `focus:ring-[#ACB1D6]` (Input Focus Ring - Soft Lavender).
 - **Sub/Support:** `text-[#ACB1D6]` (Muted Text, Placeholder, Inactive Icons), `border-[#DBDFEA]` (Light Dividers).
-- **Point (Highlight)** `bg-[#FFEAD2]` (Warm Cream), 프로필 이미지 배경이나, 강조하고 싶은 작은 요소에 사용하여 차가운 블루 톤에 따뜻함을 한 방울 더함.
+- **Point (Highlight)** `bg-[#FDF4E3]` (Warm Cream), 프로필 이미지 배경이나, 강조하고 싶은 작은 요소에 사용하여 차가운 블루 톤에 따뜻함을 한 방울 더함.
 - **Text:** `text-slate-800` (Headings - for readability), `text-slate-500` (Body), `text-[#8294C4]` (Brand/Point Text).
 
 ### Component Style

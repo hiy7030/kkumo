@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지 - KKUMO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white min-h-screen pb-24">
+
+<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-center items-center">
+        <span class="text-4xl">👑</span>
+    </div>
+</header>
+
+<main class="max-w-3xl mx-auto px-4 py-6 space-y-8">
+
+    <section class="bg-white rounded-2xl shadow-sm p-6 border border-[#DBDFEA]">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">마이페이지</h2>
+
+        <!-- 사용자 정보 영역 (향후 확장 가능) -->
+        <div class="space-y-4 mb-6">
+            <div class="flex items-center space-x-4">
+                <div class="w-16 h-16 rounded-full bg-[#FDF4E3] border-2 border-[#DBDFEA] flex items-center justify-center">
+                    <span class="text-4xl" th:text="${memberEmoji ?: '😊'}">😊</span>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800" th:text="${memberNickname ?: '꾸모'}">꾸모</h3>
+                    <p class="text-sm text-gray-600" th:text="${memberEmail ?: 'example@email.com'}">example@email.com</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Streak 정보 -->
+        <div class="bg-[#FDF4E3] rounded-xl p-4 mb-6">
+            <p class="text-sm text-gray-600 mb-1">현재 연속 기록</p>
+            <p class="text-3xl font-bold text-[#8294C4]">
+                <span th:text="${currentStreak ?: 0}">0</span>일
+                <span th:if="${hasCrown}" class="text-2xl ml-2">👑</span>
+            </p>
+        </div>
+
+        <!-- 로그아웃 버튼 -->
+        <form th:action="@{/logout}" method="post" class="mt-6">
+            <button
+                type="submit"
+                class="w-full bg-[#DBDFEA] hover:bg-[#ACB1D6] text-[#8294C4] hover:text-white font-bold py-3 rounded-xl transition-colors duration-200 flex items-center justify-center space-x-2"
+            >
+                <span class="text-xl">🚪</span>
+                <span>로그아웃</span>
+            </button>
+        </form>
+    </section>
+
+</main>
+
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] border-t border-[#DBDFEA]">
+    <div class="max-w-7xl mx-auto px-4 h-16 relative">
+        <div class="grid grid-cols-5 h-full items-center">
+
+            <a href="/kkumo/v1/home" class="flex flex-col items-center justify-center space-y-1 text-[#ACB1D6] hover:text-[#8294C4] active:scale-95 transition">
+                <span class="text-2xl">🏠</span>
+                <span class="text-[10px] font-medium">홈</span>
+            </a>
+
+            <a href="/kkumo/v1/reports/my" class="flex flex-col items-center justify-center space-y-1 text-[#ACB1D6] hover:text-[#8294C4] active:scale-95 transition">
+                <span class="text-2xl">📅</span>
+                <span class="text-[10px] font-medium">캘린더</span>
+            </a>
+
+            <div class="relative"></div>
+
+            <a href="/kkumo/v1/reports/all" class="flex flex-col items-center justify-center space-y-1 text-[#ACB1D6] hover:text-[#8294C4] active:scale-95 transition">
+                <span class="text-2xl">📊</span>
+                <span class="text-[10px] font-medium">지도</span>
+            </a>
+
+            <a href="/kkumo/v1/members/me" class="flex flex-col items-center justify-center space-y-1 text-[#8294C4] active:scale-95 transition">
+                <span class="text-2xl">😎</span>
+                <span class="text-[10px] font-medium">마이</span>
+            </a>
+        </div>
+
+        <button
+                id="uploadBtn"
+                class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-[#8294C4] hover:bg-[#6E80B0] active:scale-95 text-white w-14 h-14 rounded-full shadow-lg border-4 border-white flex items-center justify-center transition z-50">
+            <span class="text-2xl leading-none pt-1">➕</span>
+        </button>
+    </div>
+</nav>
+
+<script th:inline="javascript">
+    // ==================== Upload Button Click Handler ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadBtn = document.getElementById('uploadBtn');
+        const hasPostedToday = /*[[${hasPostedToday}]]*/ false;
+        uploadBtn.addEventListener('click', function() {
+            if (hasPostedToday) {
+                alert('오늘의 기록을 이미 완료했어요! 내일 또 만나요 😊');
+            } else {
+                location.href = '/kkumo/v1/post/create';
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

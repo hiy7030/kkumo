@@ -2,22 +2,67 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Alert</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>알림 - KKUMO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -45%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .modal-content {
+            animation: fadeInUp 0.3s ease-out;
+        }
+    </style>
 </head>
-<body>
+<body class="overflow-hidden">
+    <!-- Modal Backdrop -->
+    <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+        <!-- Modal Box -->
+        <div class="modal-content fixed top-1/2 left-1/2 w-11/12 max-w-md bg-white rounded-2xl shadow-lg border border-[#DBDFEA] p-8">
+            <!-- Message -->
+            <p class="text-slate-800 font-medium text-lg text-center mb-6" th:text="${message}">
+                메시지가 표시됩니다.
+            </p>
+
+            <!-- Confirm Button -->
+            <button
+                id="confirmBtn"
+                class="w-full rounded-full bg-[#8294C4] text-white font-bold py-3 px-6 hover:bg-[#6E80B0] active:scale-95 transition duration-200 focus:outline-none focus:ring-2 focus:ring-[#ACB1D6] focus:ring-offset-2">
+                확인
+            </button>
+        </div>
+    </div>
+
     <script th:inline="javascript">
-        const message = /*[[${message}]]*/ null;
         const nextUrl = /*[[${nextUrl}]]*/ null;
+        const confirmBtn = document.getElementById('confirmBtn');
 
-        if (message) {
-            alert(message);
-        }
+        // Confirm button click handler
+        confirmBtn.addEventListener('click', function() {
+            if (nextUrl) {
+                location.href = nextUrl;
+            } else {
+                history.back();
+            }
+        });
 
-        if (nextUrl) {
-            location.href = nextUrl;
-        } else {
-            history.back();
-        }
+        // Enter key handler
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                confirmBtn.click();
+            }
+        });
+
+        // Auto-focus on button for better UX
+        confirmBtn.focus();
     </script>
 </body>
 </html>

@@ -6,22 +6,30 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.invoke
+import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import javax.sql.DataSource
 
 /**
  * Spring Security 초기 설정
  * - MVP 개발 편의성을 위한 CSRF disable
  * - 프론트엔드 연동을 위한 CORS 전체 허용
  * - 세션 기반 인증 (formLogin)
+ * - DB 기반 Remember-Me (Persistent Token)
  */
 @Configuration
 @EnableWebSecurity
-class SecurityConfig {
+class SecurityConfig(
+    private val dataSource: DataSource,
+    private val userDetailsService: UserDetailsService
+) {
 
     /**
      * SecurityFilterChain 설정 (Spring Security Kotlin DSL 스타일)
@@ -49,7 +57,18 @@ class SecurityConfig {
             logout {
                 logoutUrl = "/logout"
                 logoutSuccessUrl = "/login?logout"
+                invalidateHttpSession = true
+                deleteCookies("JSESSIONID", "remember-me")
                 permitAll()
+            }
+
+            // Remember-Me 설정 (DB 기반 Persistent Token)
+            rememberMe {
+                key = "kkumo-remember-me-secret-key-2024"
+                tokenRepository = persistentTokenRepository()
+                userDetailsService = this@SecurityConfig.userDetailsService
+                tokenValiditySeconds = 1209600 // 14일 (2주)
+                rememberMeParameter = "remember-me"
             }
 
             // 세션 관리 (기본값: IF_REQUIRED)
@@ -104,5 +123,16 @@ class SecurityConfig {
     @Bean
     fun passwordEncoder(): PasswordEncoder {
         return BCryptPasswordEncoder()
+    }
+
+    /**
+     * Remember-Me 토큰을 DB에 저장하기 위한 PersistentTokenRepository Bean 등록
+     * JdbcTokenRepositoryImpl을 사용하여 persistent_logins 테이블에 토큰 저장
+     */
+    @Bean
+    fun persistentTokenRepository(): PersistentTokenRepository {
+        return JdbcTokenRepositoryImpl().apply {
+            setDataSource(this@SecurityConfig.dataSource)
+        }
     }
 }

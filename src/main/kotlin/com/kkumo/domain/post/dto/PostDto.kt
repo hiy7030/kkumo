@@ -32,7 +32,8 @@ data class PostResponse(
     val nickname: String,
     val writerEmoji: String,
     val hasCrown: Boolean,
-    val imageUrl: String,
+    val thumbnailUrl: String,
+    val originalImageUrl: String,
     val content: String?,
     val postedDate: LocalDate,
     val createdAt: LocalDateTime
@@ -44,7 +45,8 @@ data class PostResponse(
                 nickname = post.member.nickname,
                 writerEmoji = post.member.myEmoji,
                 hasCrown = post.member.hasCrown,
-                imageUrl = post.imageUrl,
+                thumbnailUrl = post.thumbnailUrl,
+                originalImageUrl = post.originalImageUrl,
                 content = post.content,
                 postedDate = post.postedDate,
                 createdAt = post.createdAt

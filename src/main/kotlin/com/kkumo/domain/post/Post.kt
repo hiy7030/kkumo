@@ -28,8 +28,11 @@ class Post(
     @Column(nullable = true, columnDefinition = "TEXT", length = 140)
     var content: String? = null,
 
-    @Column(name = "image_url", nullable = false)
-    var imageUrl: String,
+    @Column(name = "thumbnail_url", nullable = false)
+    var thumbnailUrl: String,
+
+    @Column(name = "original_image_url", nullable = false)
+    var originalImageUrl: String,
 
     @Column(name = "posted_date", nullable = false)
     val postedDate: LocalDate

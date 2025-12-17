@@ -27,7 +27,7 @@
 - **Inactive Icons:** `text-[#ACB1D6]`
 
 ### Point (Highlight)
-- **Accent Background:** `bg-[#FFEAD2]` (Warm Cream)
+- **Accent Background:** `bg-[#FDF4E3]` (Warm Cream)
   - **프로필 이미지 배경**, 배지, 혹은 차가운 블루 톤 사이에서 따뜻함을 주고 싶은 포인트 요소에 사용.
 
 ### Typography Colors

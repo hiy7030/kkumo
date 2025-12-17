@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>홈 - KKUMO</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 수정된 애니메이션: 아래에서 위로 살짝 떠오름 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px); /* 20px 아래에서 시작 */
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0); /* 제자리 */
+            }
+        }
+
+        .modal-content {
+            animation: fadeInUp 0.3s ease-out forwards;
+        }
+    </style>
 </head>
 <body class="bg-white min-h-screen pb-24">
 
@@ -19,7 +36,7 @@
 
     <section class="bg-white rounded-2xl shadow-sm p-6 border border-[#DBDFEA]">
 
-        <div th:if="${!hasPostedToday}" class="text-center">
+        <div th:if="${isToday && !hasPostedToday}" class="text-center">
             <p class="text-gray-600 text-sm mb-3">오늘 기록 마감까지 남은 시간</p>
             <div id="timer" class="text-5xl md:text-6xl font-bold text-[#8294C4] mb-6">
                 00:00:00
@@ -29,55 +46,53 @@
             </p>
         </div>
 
-        <div th:if="${hasPostedToday}" class="text-center">
-            <div class="mb-6">
-                <h2 class="text-2xl md:text-3xl font-bold text-[#8294C4] mb-2">
-                    🎉 <span th:text="${currentStreak}">10</span>일째 기록 성공!
-                </h2>
-                <p class="text-gray-600">정말 멋져요! 계속 함께해요 💪</p>
-            </div>
-
-            <div class="inline-block bg-white rounded-2xl shadow-sm p-4 transform hover:scale-105 transition duration-300 border-2 border-[#DBDFEA]">
-                <img
-                        th:src="${myPost.imageUrl}"
-                        alt="My Post"
-                        class="w-full max-w-sm rounded-xl mb-4 object-cover aspect-square shadow-sm"
-                />
-
-                <div class="flex items-center space-x-3">
-                    <div class="relative">
-                        <div class="w-12 h-12 rounded-full bg-[#FFEAD2] border-2 border-[#DBDFEA] flex items-center justify-center shadow-sm">
-                            <span class="text-3xl" th:text="${myPost.writerEmoji}">😊</span>
-                        </div>
-                        <span th:if="${hasCrown}" class="absolute -top-6 -left-1 text-3xl transform rotate-[-15deg] drop-shadow-md">👑</span>
-                    </div>
-
-                    <div class="text-left">
-                        <p class="font-bold text-gray-800 text-lg" th:text="${myPost.nickname}">나</p>
-                        <p class="text-sm text-gray-600" th:text="${myPost.comment}">오늘도 함께해요!</p>
-                    </div>
-                </div>
-            </div>
+        <div class="text-center">
+            <h2 class="text-2xl md:text-3xl font-bold text-[#8294C4] mb-2">
+                🎉 <span th:text="${currentStreak}">10</span>일째 기록 성공!
+            </h2>
+            <p class="text-gray-600">정말 멋져요! 계속 함께해요 💪</p>
         </div>
 
     </section>
 
     <section>
+        <div class="flex items-center justify-center gap-4 mb-6">
+            <a th:href="@{/kkumo/v1/home(date=${prevDate})}"
+               class="text-3xl text-[#8294C4] hover:text-[#6E80B0] transition">
+                ◀
+            </a>
+
+            <div class="text-3xl font-black tracking-widest text-gray-800" th:text="${formattedDate}">
+                251217
+            </div>
+
+            <a th:if="${!isToday}"
+               th:href="@{/kkumo/v1/home(date=${nextDate})}"
+               class="text-3xl text-[#8294C4] hover:text-[#6E80B0] transition">
+                ▶
+            </a>
+            <span th:if="${isToday}" class="text-3xl text-gray-300 cursor-not-allowed">
+                ▶
+            </span>
+        </div>
+
         <div class="text-center mb-6">
             <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-1">
-                오늘 함께 기록한 꾸모들
+                <span th:if="${isToday}">오늘 </span>함께 기록한 꾸모들
             </h3>
             <p class="text-gray-600 text-sm">
-                <span class="text-[#8294C4] font-bold" th:text="${recordCount}">20</span>명이 함께하고 있어요 🌟
+                <span class="text-[#8294C4] font-bold" th:text="${recordCount}">20</span>명이
+                <span th:if="${isToday}">함께하고 있어요 🌟</span>
+                <span th:unless="${isToday}">함께했어요 🌟</span>
             </p>
         </div>
 
         <div class="space-y-4">
             <div th:each="item : ${feedList}" class="bg-white rounded-xl shadow-sm overflow-hidden border border-[#DBDFEA]">
-                <div class="px-4 pt-4 pb-2 flex items-center justify-between">
+                <div class="px-4 pt-4 pb-3 flex items-center justify-between">
                     <div class="flex items-center space-x-2 relative">
                         <div class="relative">
-                            <div class="w-10 h-10 rounded-full bg-[#FFEAD2] border border-[#DBDFEA] flex items-center justify-center">
+                            <div class="w-10 h-10 rounded-full bg-[#FDF4E3] border border-[#DBDFEA] flex items-center justify-center">
                                 <span class="text-2xl" th:text="${item.writerEmoji}">😊</span>
                             </div>
                             <span th:if="${item.hasCrown}" class="absolute -top-4 -left-1 text-xl transform rotate-[-15deg] drop-shadow-sm">👑</span>
@@ -86,7 +101,19 @@
                     </div>
                     <span class="text-xs text-gray-500 relative-time" th:data-time="${item.createdAt}">방금 전</span>
                 </div>
-                <img th:src="${item.imageUrl}" alt="Feed Image" class="w-full object-cover aspect-square" />
+
+                <div class="px-4">
+                    <div class="w-full aspect-square bg-gray-50 rounded-2xl border border-[#DBDFEA] overflow-hidden flex items-center justify-center relative">
+                        <img
+                                th:src="${item.thumbnailUrl}"
+                                th:data-original-url="${item.originalImageUrl}"
+                                onclick="openImageViewer(this.getAttribute('data-original-url'))"
+                                alt="Feed Image"
+                                class="w-full h-full object-contain cursor-pointer hover:opacity-90 transition"
+                        />
+                    </div>
+                </div>
+
                 <div class="p-4">
                     <p class="text-sm text-gray-700 mb-3" th:text="${item.comment}">댓글</p>
                     <div class="flex items-center justify-around border-t border-[#DBDFEA] pt-3">
@@ -141,6 +168,42 @@
     </div>
 </nav>
 
+<div id="alreadyPostedModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[200] flex items-center justify-center">
+    <div class="modal-content w-11/12 max-w-md bg-white rounded-2xl shadow-lg border border-[#DBDFEA] p-8 relative">
+        <p class="text-slate-800 font-medium text-lg text-center mb-6">
+            오늘의 기록을 이미 완료했어요!<br>
+            내일 또 만나요 😊
+        </p>
+
+        <button
+                onclick="closeAlreadyPostedModal()"
+                id="modalConfirmBtn"
+                class="w-full rounded-full bg-[#8294C4] text-white font-bold py-3 px-6 hover:bg-[#6E80B0] active:scale-95 transition duration-200 focus:outline-none focus:ring-2 focus:ring-[#ACB1D6] focus:ring-offset-2">
+            확인
+        </button>
+    </div>
+</div>
+
+<div id="imageViewerModal" class="hidden fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm">
+    <button
+            onclick="closeImageViewer()"
+            class="absolute top-4 right-4 z-[110] w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full text-white text-2xl transition">
+        ✕
+    </button>
+
+    <div class="w-full h-full flex items-center justify-center p-4 overflow-auto" id="imageContainer">
+        <img
+                id="viewerImage"
+                src=""
+                alt="Original Image"
+                onclick="toggleZoom()"
+                class="max-w-full max-h-full object-contain rounded-lg cursor-zoom-in transition-transform duration-300"
+        />
+    </div>
+
+    <div onclick="closeImageViewer()" class="absolute inset-0 -z-10"></div>
+</div>
+
 <script th:inline="javascript">
     // ==================== Countdown Timer (KST 자정 기준) ====================
     function updateTimer() {
@@ -190,7 +253,8 @@
         const hasPostedToday = /*[[${hasPostedToday}]]*/ false;
         uploadBtn.addEventListener('click', function() {
             if (hasPostedToday) {
-                alert('오늘의 기록을 이미 완료했어요! 내일 또 만나요 😊');
+                // [변경] alert() 대신 커스텀 모달 호출
+                openAlreadyPostedModal();
             } else {
                 location.href = '/kkumo/v1/post/create';
             }
@@ -210,6 +274,79 @@
                 setTimeout(() => { countElement.classList.remove('text-[#8294C4]', 'font-bold'); }, 300);
             });
         });
+    });
+
+    // ==================== [NEW] Already Posted Modal Functions ====================
+    function openAlreadyPostedModal() {
+        const modal = document.getElementById('alreadyPostedModal');
+        const btn = document.getElementById('modalConfirmBtn');
+        modal.classList.remove('hidden');
+        btn.focus(); // 접근성: 버튼에 포커스
+    }
+
+    function closeAlreadyPostedModal() {
+        const modal = document.getElementById('alreadyPostedModal');
+        modal.classList.add('hidden');
+    }
+
+    // 모달 단축키 (Enter/Esc)
+    document.addEventListener('keydown', function(event) {
+        const modal = document.getElementById('alreadyPostedModal');
+        if (!modal.classList.contains('hidden')) {
+            if (event.key === 'Enter' || event.key === 'Escape') {
+                closeAlreadyPostedModal();
+            }
+        }
+    });
+
+    // ==================== Image Viewer (Lightbox) Functions ====================
+    let isZoomed = false;
+
+    function openImageViewer(originalUrl) {
+        const modal = document.getElementById('imageViewerModal');
+        const viewerImage = document.getElementById('viewerImage');
+        modal.classList.remove('hidden');
+        viewerImage.src = originalUrl;
+        document.body.style.overflow = 'hidden';
+        isZoomed = false;
+        viewerImage.classList.remove('scale-150');
+        viewerImage.classList.add('cursor-zoom-in');
+        viewerImage.classList.remove('cursor-zoom-out');
+    }
+
+    function closeImageViewer() {
+        const modal = document.getElementById('imageViewerModal');
+        const viewerImage = document.getElementById('viewerImage');
+        modal.classList.add('hidden');
+        viewerImage.src = '';
+        document.body.style.overflow = '';
+        isZoomed = false;
+        viewerImage.classList.remove('scale-150');
+        viewerImage.classList.add('cursor-zoom-in');
+        viewerImage.classList.remove('cursor-zoom-out');
+    }
+
+    function toggleZoom() {
+        const viewerImage = document.getElementById('viewerImage');
+        isZoomed = !isZoomed;
+        if (isZoomed) {
+            viewerImage.classList.add('scale-150');
+            viewerImage.classList.remove('cursor-zoom-in');
+            viewerImage.classList.add('cursor-zoom-out');
+        } else {
+            viewerImage.classList.remove('scale-150');
+            viewerImage.classList.add('cursor-zoom-in');
+            viewerImage.classList.remove('cursor-zoom-out');
+        }
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const modal = document.getElementById('imageViewerModal');
+            if (!modal.classList.contains('hidden')) {
+                closeImageViewer();
+            }
+        }
     });
 </script>
 

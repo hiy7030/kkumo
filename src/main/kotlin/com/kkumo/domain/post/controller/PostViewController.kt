@@ -1,13 +1,19 @@
 package com.kkumo.domain.post.controller
 
+import com.kkumo.domain.post.service.PostService
+import com.kkumo.domain.reaction.ReactionType
 import com.kkumo.global.annotation.KKumoWebController
 import com.kkumo.global.auth.CustomUserDetails
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestParam
+import java.time.LocalDate
 
 @KKumoWebController
-class PostViewController {
+class PostViewController(
+    private val postService: PostService,
+) {
 
     /**
      * 게시글 작성 페이지
@@ -27,5 +33,43 @@ class PostViewController {
         model.addAttribute("emoji", member.myEmoji)
 
         return "create-post"
+    }
+
+    @GetMapping("/home")
+    fun homePage2(
+        @AuthenticationPrincipal user: CustomUserDetails,
+        @RequestParam(required = false) date: String?,
+        model: Model
+    ): String {
+        val today = LocalDate.now()
+        val selectedDate = date?.let { LocalDate.parse(it) } ?: today
+        val isToday = selectedDate == today
+
+        // 날짜 네비게이션용 데이터
+        val prevDate = selectedDate.minusDays(1).toString() // yyyy-MM-dd
+        val nextDate = selectedDate.plusDays(1).toString() // yyyy-MM-dd
+        val formattedDate = selectedDate.format(java.time.format.DateTimeFormatter.ofPattern("yyMMdd")) // YYMMDD
+
+        model.addAttribute("selectedDate", selectedDate)
+        model.addAttribute("prevDate", prevDate)
+        model.addAttribute("nextDate", nextDate)
+        model.addAttribute("isToday", isToday)
+        model.addAttribute("formattedDate", formattedDate)
+
+        val response = postService.getDailyFeed(
+            user = user.member,
+            date = selectedDate,
+        )
+        model.addAttribute("hasPostedToday", response.memberInfos.hasPostedToday)
+        model.addAttribute("currentStreak", response.memberInfos.currentStreak)
+        model.addAttribute("hasCrown", response.memberInfos.hasCrown)
+
+
+        model.addAttribute("feedList", response.posts)
+        model.addAttribute("recordCount", response.posts.size)
+
+        model.addAttribute("reactionTypes", ReactionType.entries)
+
+        return "home"
     }
 }

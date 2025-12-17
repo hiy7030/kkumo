@@ -17,20 +17,39 @@
     <form id="signupForm" class="space-y-4">
         <div>
             <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">이메일</label>
-            <div class="flex gap-2">
-                <input type="email" id="email" name="email" required placeholder="example@email.com" class="flex-1 px-4 py-3 rounded-xl border border-[#DBDFEA] focus:ring-2 focus:ring-[#ACB1D6] focus:border-[#8294C4] outline-none transition" />
-                <button type="button" id="sendCodeBtn" class="bg-[#ACB1D6] hover:bg-[#9BA3C4] text-white font-semibold px-6 py-3 rounded-full transition-colors duration-200 whitespace-nowrap">
+            <div class="flex flex-col sm:flex-row gap-2">
+                <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        required
+                        placeholder="example@email.com"
+                        class="w-full sm:flex-1 px-4 py-3 rounded-xl border border-[#DBDFEA] focus:ring-2 focus:ring-[#ACB1D6] focus:border-[#8294C4] outline-none transition"
+                />
+                <button
+                        type="button"
+                        id="sendCodeBtn"
+                        class="w-full sm:w-auto bg-[#ACB1D6] hover:bg-[#9BA3C4] text-white font-semibold px-6 py-3 rounded-xl sm:rounded-full transition-colors duration-200 whitespace-nowrap">
                     인증번호 전송
                 </button>
             </div>
         </div>
 
-        <!-- 인증번호 입력 영역 (초기에는 숨김) -->
         <div id="verificationSection" class="hidden">
             <label for="verificationCode" class="block text-sm font-semibold text-gray-700 mb-2">인증번호</label>
-            <div class="flex gap-2">
-                <input type="text" id="verificationCode" name="verificationCode" placeholder="6자리 인증번호" maxlength="6" class="flex-1 px-4 py-3 rounded-xl border border-[#DBDFEA] focus:ring-2 focus:ring-[#ACB1D6] focus:border-[#8294C4] outline-none transition" />
-                <button type="button" id="verifyCodeBtn" class="bg-[#8294C4] hover:bg-[#6E80B0] text-white font-semibold px-6 py-3 rounded-full transition-colors duration-200 whitespace-nowrap">
+            <div class="flex flex-col sm:flex-row gap-2">
+                <input
+                        type="text"
+                        id="verificationCode"
+                        name="verificationCode"
+                        placeholder="6자리 인증번호"
+                        maxlength="6"
+                        class="w-full sm:flex-1 px-4 py-3 rounded-xl border border-[#DBDFEA] focus:ring-2 focus:ring-[#ACB1D6] focus:border-[#8294C4] outline-none transition"
+                />
+                <button
+                        type="button"
+                        id="verifyCodeBtn"
+                        class="w-full sm:w-auto bg-[#8294C4] hover:bg-[#6E80B0] text-white font-semibold px-6 py-3 rounded-xl sm:rounded-full transition-colors duration-200 whitespace-nowrap">
                     확인
                 </button>
             </div>
@@ -80,6 +99,7 @@
     const btnText = document.querySelector('#emojiBtnText');
     const btnIcon = document.querySelector('#btnIcon');
 
+    // 이모지 피커 설정
     const picker = new EmojiButton({
         position: 'bottom-start',
         zIndex: 9999,
@@ -115,7 +135,7 @@
 
         btnIcon.innerText = selectedEmoji;
         btnText.innerText = "선택 완료!";
-        triggerBtn.classList.add("border-[#8294C4]", "bg-[#FFEAD2]", "text-gray-900");
+        triggerBtn.classList.add("border-[#8294C4]", "bg-[#FDF4E3]", "text-gray-900");
         triggerBtn.classList.remove("border-[#DBDFEA]", "text-gray-500");
 
         hiddenInput.value = selectedEmoji;
@@ -125,7 +145,7 @@
         picker.togglePicker(triggerBtn);
     });
 
-    // 이메일 인증 로직
+    // 이메일 인증 관련 변수 및 요소
     let isEmailVerified = false;
     let timerInterval = null;
     const emailInput = document.getElementById('email');
@@ -136,7 +156,7 @@
     const timerElement = document.getElementById('timer');
     const verificationMessage = document.getElementById('verificationMessage');
 
-    // 인증번호 전송
+    // 1. 인증번호 전송
     sendCodeBtn.addEventListener('click', async () => {
         const email = emailInput.value;
         if (!email) {
@@ -155,10 +175,10 @@
             if (result.success) {
                 alert('✉️ 인증번호가 전송되었습니다. 이메일을 확인해주세요.');
                 verificationSection.classList.remove('hidden');
-                emailInput.disabled = true;
+                emailInput.disabled = true; // 이메일 수정 불가
                 sendCodeBtn.disabled = true;
                 sendCodeBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                startTimer(180); // 3분 타이머
+                startTimer(180); // 3분 타이머 시작
             } else {
                 alert(result.error ? result.error.message : '전송 실패');
             }
@@ -168,7 +188,7 @@
         }
     });
 
-    // 인증번호 확인
+    // 2. 인증번호 확인
     verifyCodeBtn.addEventListener('click', async () => {
         const email = emailInput.value;
         const code = verificationCode.value;
@@ -188,7 +208,7 @@
 
             if (result.success) {
                 isEmailVerified = true;
-                clearInterval(timerInterval);
+                clearInterval(timerInterval); // 타이머 멈춤
                 verificationMessage.textContent = '✅ 인증되었습니다';
                 verificationMessage.classList.add('text-[#8294C4]', 'font-semibold');
                 timerElement.textContent = '';
@@ -204,9 +224,12 @@
         }
     });
 
-    // 타이머 함수
+    // 3. 타이머 함수
     function startTimer(seconds) {
         let timeLeft = seconds;
+        // 기존 타이머가 있다면 제거
+        if (timerInterval) clearInterval(timerInterval);
+
         timerInterval = setInterval(() => {
             const minutes = Math.floor(timeLeft / 60);
             const secs = timeLeft % 60;
@@ -225,11 +248,11 @@
         }, 1000);
     }
 
-    // 폼 제출 로직
+    // 4. 최종 회원가입 폼 제출
     document.getElementById('signupForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // 이메일 인증 확인
+        // 유효성 검사
         if (!isEmailVerified) {
             alert('이메일 인증을 완료해주세요.');
             return;
@@ -257,7 +280,7 @@
             const result = await response.json();
 
             if (result.success) {
-                alert('환영합니다! 👑');
+                alert('환영합니다! 👑 로그인 페이지로 이동합니다.');
                 window.location.href = '/login';
             } else {
                 alert(result.error ? result.error.message : '가입 실패');
