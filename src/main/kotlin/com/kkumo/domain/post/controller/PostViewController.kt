@@ -41,25 +41,23 @@ class PostViewController(
         @RequestParam(required = false) date: String?,
         model: Model
     ): String {
-        val today = LocalDate.now()
-        val selectedDate = date?.let { LocalDate.parse(it) } ?: today
-        val isToday = selectedDate == today
-
-        // 날짜 네비게이션용 데이터
-        val prevDate = selectedDate.minusDays(1).toString() // yyyy-MM-dd
-        val nextDate = selectedDate.plusDays(1).toString() // yyyy-MM-dd
-        val formattedDate = selectedDate.format(java.time.format.DateTimeFormatter.ofPattern("yyMMdd")) // YYMMDD
-
-        model.addAttribute("selectedDate", selectedDate)
-        model.addAttribute("prevDate", prevDate)
-        model.addAttribute("nextDate", nextDate)
-        model.addAttribute("isToday", isToday)
-        model.addAttribute("formattedDate", formattedDate)
 
         val response = postService.getDailyFeed(
             user = user.member,
-            date = selectedDate,
+            date = date,
         )
+
+        val prevDate = response.selectedDate.minusDays(1).toString() // yyyy-MM-dd
+        val nextDate = response.selectedDate.plusDays(1).toString() // yyyy-MM-dd
+        val formattedDate = response.selectedDate.format(java.time.format.DateTimeFormatter.ofPattern("yyMMdd")) // YYMMDD
+
+        model.addAttribute("selectedDate", response.selectedDate)
+        model.addAttribute("prevDate", prevDate)
+        model.addAttribute("nextDate", nextDate)
+        model.addAttribute("isToday", response.isToday)
+        model.addAttribute("formattedDate", formattedDate)
+
+
         model.addAttribute("hasPostedToday", response.memberInfos.hasPostedToday)
         model.addAttribute("currentStreak", response.memberInfos.currentStreak)
         model.addAttribute("hasCrown", response.memberInfos.hasCrown)

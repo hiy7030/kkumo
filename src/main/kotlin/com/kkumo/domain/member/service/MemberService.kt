@@ -1,5 +1,6 @@
 package com.kkumo.domain.member.service
 
+import com.kkumo.domain.member.Member
 import com.kkumo.domain.member.repository.MemberRepository
 import com.kkumo.domain.member.dto.MemberDto
 import com.kkumo.global.error.BusinessException
@@ -43,5 +44,12 @@ class MemberService(
         if (emoji == "👑") {
             throw BusinessException(ErrorCode.CROWN_EMOJI_NOT_ALLOWED)
         }
+    }
+
+    @Transactional(readOnly = true)
+    fun getMyInfo(
+        member: Member,
+    ) {
+
     }
 }

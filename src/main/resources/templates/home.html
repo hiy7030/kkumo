@@ -25,12 +25,7 @@
 </head>
 <body class="bg-white min-h-screen pb-24">
 
-<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-center items-center">
-        <span th:if="${!hasPostedToday}" class="text-4xl">🐢</span>
-        <span th:if="${hasPostedToday}" class="text-4xl">👑</span>
-    </div>
-</header>
+<div th:replace="~{fragments/layout :: header(${hasPostedToday ? '👑' : '🐢'})}"></div>
 
 <main class="max-w-3xl mx-auto px-4 py-6 space-y-8">
 
@@ -133,56 +128,9 @@
 
 </main>
 
-<nav class="fixed bottom-0 left-0 right-0 z-50 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] border-t border-[#DBDFEA]">
-    <div class="max-w-7xl mx-auto px-4 h-16 relative">
-        <div class="grid grid-cols-5 h-full items-center">
+<div th:replace="~{fragments/layout :: navbar('home', ${hasPostedToday})}"></div>
 
-            <a href="/kkumo/v1/home" class="flex flex-col items-center justify-center space-y-1 text-[#8294C4] active:scale-95 transition">
-                <span class="text-2xl">🏠</span>
-                <span class="text-[10px] font-medium">홈</span>
-            </a>
-
-            <a href="/kkumo/v1/reports/my" class="flex flex-col items-center justify-center space-y-1 text-[#ACB1D6] hover:text-[#8294C4] active:scale-95 transition">
-                <span class="text-2xl">📅</span>
-                <span class="text-[10px] font-medium">캘린더</span>
-            </a>
-
-            <div class="relative"></div>
-
-            <a href="/kkumo/v1/reports/all" class="flex flex-col items-center justify-center space-y-1 text-[#ACB1D6] hover:text-[#8294C4] active:scale-95 transition">
-                <span class="text-2xl">📊</span>
-                <span class="text-[10px] font-medium">지도</span>
-            </a>
-
-            <a href="/kkumo/v1/members/me" class="flex flex-col items-center justify-center space-y-1 text-[#ACB1D6] hover:text-[#8294C4] active:scale-95 transition">
-                <span class="text-2xl">😎</span>
-                <span class="text-[10px] font-medium">마이</span>
-            </a>
-        </div>
-
-        <button
-                id="uploadBtn"
-                class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-[#8294C4] hover:bg-[#6E80B0] active:scale-95 text-white w-14 h-14 rounded-full shadow-lg border-4 border-white flex items-center justify-center transition z-50">
-            <span class="text-2xl leading-none pt-1">➕</span>
-        </button>
-    </div>
-</nav>
-
-<div id="alreadyPostedModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[200] flex items-center justify-center">
-    <div class="modal-content w-11/12 max-w-md bg-white rounded-2xl shadow-lg border border-[#DBDFEA] p-8 relative">
-        <p class="text-slate-800 font-medium text-lg text-center mb-6">
-            오늘의 기록을 이미 완료했어요!<br>
-            내일 또 만나요 😊
-        </p>
-
-        <button
-                onclick="closeAlreadyPostedModal()"
-                id="modalConfirmBtn"
-                class="w-full rounded-full bg-[#8294C4] text-white font-bold py-3 px-6 hover:bg-[#6E80B0] active:scale-95 transition duration-200 focus:outline-none focus:ring-2 focus:ring-[#ACB1D6] focus:ring-offset-2">
-            확인
-        </button>
-    </div>
-</div>
+<div th:replace="~{fragments/layout :: alreadyPostedModal}"></div>
 
 <div id="imageViewerModal" class="hidden fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm">
     <button
@@ -253,7 +201,6 @@
         const hasPostedToday = /*[[${hasPostedToday}]]*/ false;
         uploadBtn.addEventListener('click', function() {
             if (hasPostedToday) {
-                // [변경] alert() 대신 커스텀 모달 호출
                 openAlreadyPostedModal();
             } else {
                 location.href = '/kkumo/v1/post/create';
@@ -274,29 +221,6 @@
                 setTimeout(() => { countElement.classList.remove('text-[#8294C4]', 'font-bold'); }, 300);
             });
         });
-    });
-
-    // ==================== [NEW] Already Posted Modal Functions ====================
-    function openAlreadyPostedModal() {
-        const modal = document.getElementById('alreadyPostedModal');
-        const btn = document.getElementById('modalConfirmBtn');
-        modal.classList.remove('hidden');
-        btn.focus(); // 접근성: 버튼에 포커스
-    }
-
-    function closeAlreadyPostedModal() {
-        const modal = document.getElementById('alreadyPostedModal');
-        modal.classList.add('hidden');
-    }
-
-    // 모달 단축키 (Enter/Esc)
-    document.addEventListener('keydown', function(event) {
-        const modal = document.getElementById('alreadyPostedModal');
-        if (!modal.classList.contains('hidden')) {
-            if (event.key === 'Enter' || event.key === 'Escape') {
-                closeAlreadyPostedModal();
-            }
-        }
     });
 
     // ==================== Image Viewer (Lightbox) Functions ====================
@@ -349,6 +273,8 @@
         }
     });
 </script>
+
+<div th:replace="~{fragments/layout :: alreadyPostedModalScript}"></div>
 
 </body>
 </html>

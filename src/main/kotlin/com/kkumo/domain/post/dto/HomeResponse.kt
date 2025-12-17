@@ -2,6 +2,7 @@ package com.kkumo.domain.post.dto
 
 import com.kkumo.domain.post.Post
 import com.kkumo.domain.reaction.ReactionType
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 /**
@@ -10,6 +11,8 @@ import java.time.LocalDateTime
  */
 object HomeResponse {
     data class HomeResponse(
+        val selectedDate: LocalDate,
+        val isToday: Boolean,
         val memberInfos: MemberResponse,
         val posts: List<FeedResponse>
     )

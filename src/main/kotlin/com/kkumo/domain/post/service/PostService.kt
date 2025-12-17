@@ -106,10 +106,14 @@ class PostService(
      */
     fun getDailyFeed(
         user: Member,
-        date: LocalDate
+        date: String?
     ): HomeResponse.HomeResponse {
+        val today = LocalDate.now()
+        val selectedDate = date?.let { LocalDate.parse(it) } ?: today
+        val isToday = selectedDate == today
+
         // 1. 해당 날짜의 게시글 조회
-        val posts = postRepository.findAllByPostedDateOrderByCreatedAtDesc(date)
+        val posts = postRepository.findAllByPostedDateOrderByCreatedAtDesc(selectedDate)
 
         // 2. 모든 게시글의 리액션 개수 집계
         val reactionCounts = reactionRepository.countByPostsGroupByType(posts)
@@ -133,12 +137,16 @@ class PostService(
             HomeResponse.FeedResponse.from(post, allReactions)
         }
 
+
+
         return HomeResponse.HomeResponse(
             memberInfos = HomeResponse.MemberResponse(
                 currentStreak = user.currentStreak,
                 hasCrown = user.hasCrown,
-                hasPostedToday = dailyPosts.find { it.nickname == user.nickname } != null,
+                hasPostedToday = user.lastPostedAt?.let { it == today }?: false,
             ),
+            isToday = isToday,
+            selectedDate = selectedDate,
             posts = dailyPosts,
         )
     }
