@@ -1,7 +1,6 @@
 package com.kkumo.domain.post.controller
 
-import com.kkumo.domain.post.dto.PostCreateResponse
-import com.kkumo.domain.post.dto.PostResponse
+import com.kkumo.domain.post.dto.PostDto
 import com.kkumo.domain.post.service.PostService
 import com.kkumo.global.annotation.KKumoRestController
 import com.kkumo.global.auth.CustomUserDetails
@@ -42,7 +41,7 @@ class PostController(
         @AuthenticationPrincipal user: CustomUserDetails,
         @RequestPart("image") imageFile: MultipartFile,
         @RequestParam("content", required = false) content: String?
-    ): PostCreateResponse {
+    ): PostDto.CreateResponse {
         // CustomUserDetails에서 Member 엔티티 직접 접근
         val member = user.member
 
@@ -73,7 +72,7 @@ class PostController(
      * }
      */
     @GetMapping("/posts/today")
-    fun getTodayPosts(): ApiResponse<List<PostResponse>> {
+    fun getTodayPosts(): ApiResponse<List<PostDto.Response>> {
         val posts = postService.getTodayPosts()
         return ApiResponse.success(posts)
     }
@@ -95,7 +94,7 @@ class PostController(
         @AuthenticationPrincipal user: CustomUserDetails,
         @PageableDefault(size = 20, sort = ["createdAt"], direction = Sort.Direction.DESC)
         pageable: Pageable
-    ): ApiResponse<Page<PostResponse>> {
+    ): ApiResponse<Page<PostDto.Response>> {
         // CustomUserDetails에서 Member 엔티티 직접 접근
         val member = user.member
 

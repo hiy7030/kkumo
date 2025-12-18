@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나의 기록 캘린더 - KKUMO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white min-h-screen pb-24">
+
+<div th:replace="~{fragments/layout :: header(${hasPostedToday ? '👑' : '🐢'})}"></div>
+
+<main class="max-w-3xl mx-auto px-4 py-6">
+
+    <!-- Month Navigation -->
+    <section class="mb-8">
+        <div class="flex items-center justify-center gap-6">
+            <a th:href="@{/kkumo/v1/reports/my(year=${prevYear}, month=${prevMonth})}"
+               class="text-3xl text-[#8294C4] hover:text-[#6E80B0] transition active:scale-95">
+                ◀
+            </a>
+
+            <h1 class="text-2xl font-bold text-slate-800">
+                <span th:text="${year}">2024</span>년 <span th:text="${month}">12</span>월
+            </h1>
+
+            <a th:if="${!isCurrentMonth}"
+               th:href="@{/kkumo/v1/reports/my(year=${nextYear}, month=${nextMonth})}"
+               class="text-3xl text-[#8294C4] hover:text-[#6E80B0] transition active:scale-95">
+                ▶
+            </a>
+            <span th:if="${isCurrentMonth}" class="text-3xl text-gray-300 cursor-not-allowed">
+                ▶
+            </span>
+        </div>
+    </section>
+
+    <!-- Calendar Grid -->
+    <section class="bg-white rounded-2xl shadow-sm p-4 md:p-6 border border-[#DBDFEA]">
+
+        <!-- Day of Week Header -->
+        <div class="grid grid-cols-7 gap-2 mb-4">
+            <div class="text-center text-sm font-bold text-red-500">일</div>
+            <div class="text-center text-sm font-bold text-slate-600">월</div>
+            <div class="text-center text-sm font-bold text-slate-600">화</div>
+            <div class="text-center text-sm font-bold text-slate-600">수</div>
+            <div class="text-center text-sm font-bold text-slate-600">목</div>
+            <div class="text-center text-sm font-bold text-slate-600">금</div>
+            <div class="text-center text-sm font-bold text-blue-500">토</div>
+        </div>
+
+        <!-- Calendar Days -->
+        <div class="grid grid-cols-7 gap-2">
+            <div th:each="calendarDay : ${calendarDays}"
+                 th:classappend="${calendarDay.date != null && calendarDay.date.isEqual(today)} ? 'ring-2 ring-[#8294C4]' : ''"
+                 class="aspect-square flex items-center justify-center rounded-xl transition hover:bg-[#DBDFEA]/30">
+
+                <!-- Empty Slot -->
+                <div th:if="${calendarDay.day == 0}"></div>
+
+                <!-- Day with Post (Show Emoji) -->
+                <div th:if="${calendarDay.day > 0 && calendarDay.hasPost}"
+                     class="text-3xl md:text-4xl">
+                    <span th:text="${userEmoji}">😀</span>
+                </div>
+
+                <!-- Day without Post (Show Day Number) -->
+                <div th:if="${calendarDay.day > 0 && !calendarDay.hasPost}"
+                     class="text-base md:text-lg font-medium text-gray-700">
+                    <span th:text="${calendarDay.day}">1</span>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Legend -->
+    <section class="mt-6 text-center">
+        <p class="text-sm text-slate-500">
+            <span th:text="${userEmoji}">😀</span> 기록한 날 |
+            <span class="text-gray-700 font-medium">숫자</span> 기록 안 한 날
+        </p>
+    </section>
+
+</main>
+
+<div th:replace="~{fragments/layout :: navbar('calendar', ${hasPostedToday})}"></div>
+
+<div th:replace="~{fragments/layout :: alreadyPostedModal}"></div>
+
+<script th:inline="javascript">
+    // Upload Button Click Handler
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadBtn = document.getElementById('uploadBtn');
+        const hasPostedToday = /*[[${hasPostedToday}]]*/ false;
+        uploadBtn.addEventListener('click', function() {
+            if (hasPostedToday) {
+                openAlreadyPostedModal();
+            } else {
+                location.href = '/kkumo/v1/post/create';
+            }
+        });
+    });
+</script>
+
+<div th:replace="~{fragments/layout :: alreadyPostedModalScript}"></div>
+
+</body>
+</html>

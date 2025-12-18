@@ -1,6 +1,7 @@
 package com.kkumo.domain.member.controller
 
 import com.kkumo.domain.member.repository.MemberRepository
+import com.kkumo.domain.post.service.PostService
 import com.kkumo.global.annotation.KKumoWebController
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
@@ -10,7 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping
 
 @KKumoWebController
 class MemberViewController(
-    private val memberRepository: MemberRepository
+    private val memberRepository: MemberRepository,
+    private val postService: PostService
 ) {
 
     @GetMapping("/signup")
@@ -40,6 +42,10 @@ class MemberViewController(
         model.addAttribute("currentStreak", member.currentStreak)
         model.addAttribute("hasCrown", member.hasCrown)
         model.addAttribute("hasPostedToday", member.lastPostedAt == java.time.LocalDate.now())
+
+        // 내 기록 목록 조회 (리액션 포함)
+        val myFeedList = postService.getMyFeedList(member)
+        model.addAttribute("myFeedList", myFeedList)
 
         return "my-page"
     }

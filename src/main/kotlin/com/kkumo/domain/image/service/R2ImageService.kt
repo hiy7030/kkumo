@@ -44,12 +44,12 @@ class R2ImageService(
         // 4. 썸네일 생성 및 업로드 (1200x1200, 품질 80%)
         val thumbnailBytes = createThumbnail(file)
         uploadToR2(thumbnailFileName, thumbnailBytes, contentType)
-        val thumbnailUrl = "$publicDomain/$thumbnailFileName"
+        val thumbnailUrl = "$publicDomain$thumbnailFileName"
 
         // 5. 원본 이미지 업로드 (압축 없이 그대로)
         val originalBytes = file.bytes
         uploadToR2(originalFileName, originalBytes, contentType)
-        val originalImageUrl = "$publicDomain/$originalFileName"
+        val originalImageUrl = "$publicDomain$originalFileName"
 
         // 6. 반환
         return ImageUploadResult(

@@ -5,8 +5,7 @@ import com.kkumo.domain.member.Member
 import com.kkumo.domain.member.repository.MemberRepository
 import com.kkumo.domain.post.Post
 import com.kkumo.domain.post.dto.HomeResponse
-import com.kkumo.domain.post.dto.PostCreateResponse
-import com.kkumo.domain.post.dto.PostResponse
+import com.kkumo.domain.post.dto.PostDto
 import com.kkumo.domain.post.repository.PostRepository
 import com.kkumo.domain.reaction.ReactionType
 import com.kkumo.domain.reaction.repository.ReactionRepository
@@ -40,7 +39,7 @@ class PostService(
         member: Member,
         content: String?,
         imageFile: MultipartFile
-    ): PostCreateResponse {
+    ): PostDto.CreateResponse {
         val today = LocalDate.now()
 
         // 1. 1일 1회 작성 제한 체크
@@ -70,7 +69,7 @@ class PostService(
         // 도메인 로직 호출 -> JPA Dirty Checking으로 자동 DB 반영
         persistentMember.succeedPost(today)
 
-        return PostCreateResponse.success(savedPost.id ?: 0L)
+        return PostDto.CreateResponse.success(savedPost.id ?: 0L)
     }
 
     /**
@@ -78,10 +77,10 @@ class PostService(
      * - 오늘 날짜에 작성된 모든 게시글
      * - 최신순 정렬
      */
-    fun getTodayPosts(): List<PostResponse> {
+    fun getTodayPosts(): List<PostDto.Response> {
         val today = LocalDate.now()
         val posts = postRepository.findAllByPostedDateOrderByCreatedAtDesc(today)
-        return posts.map { PostResponse.from(it) }
+        return posts.map { PostDto.Response.from(it) }
     }
 
     /**
@@ -90,9 +89,9 @@ class PostService(
      * - 페이징 처리
      * - 최신순 정렬
      */
-    fun getMyPosts(member: Member, pageable: Pageable): Page<PostResponse> {
+    fun getMyPosts(member: Member, pageable: Pageable): Page<PostDto.Response> {
         val posts = postRepository.findAllByMemberOrderByCreatedAtDesc(member, pageable)
-        return posts.map { PostResponse.from(it) }
+        return posts.map { PostDto.Response.from(it) }
     }
 
     /**
@@ -118,20 +117,33 @@ class PostService(
         // 2. 모든 게시글의 리액션 개수 집계
         val reactionCounts = reactionRepository.countByPostsGroupByType(posts)
 
-        // 3. Post ID별로 ReactionType -> Count 맵 생성
-        val reactionMap = reactionCounts
+        // 3. 모든 게시글의 최근 반응자 조회
+        val reactionReactors = reactionRepository.findRecentReactorsByPosts(posts)
+
+        // 4. Post ID별로 ReactionType -> Count 맵 생성
+        val reactionCountMap = reactionCounts
             .groupBy { it.getPostId() }
             .mapValues { (_, projections) ->
                 projections.associate { it.getReactionType() to it.getCount().toInt() }
             }
 
-        // 4. Post 엔티티를 FeedResponse로 변환
-        val dailyPosts = posts.map { post ->
-            val postReactions = reactionMap[post.id] ?: emptyMap()
+        // 5. Post ID별, ReactionType별로 최근 반응자 리스트 생성 (최대 3명)
+        val reactionReactorMap = reactionReactors
+            .groupBy { it.getPostId() to it.getReactionType() }
+            .mapValues { (_, projections) ->
+                projections.take(3).map { it.getReactorNickname() }
+            }
 
-            // 모든 ReactionType에 대해 개수 초기화 (없는 타입은 0)
+        // 6. Post 엔티티를 FeedResponse로 변환
+        val dailyPosts = posts.map { post ->
+            val postId = post.id ?: 0L
+            val postCountMap = reactionCountMap[postId] ?: emptyMap()
+
+            // 모든 ReactionType에 대해 ReactionInfo 생성
             val allReactions = ReactionType.entries.associateWith { type ->
-                postReactions[type] ?: 0
+                val count = postCountMap[type] ?: 0
+                val reactors = reactionReactorMap[postId to type] ?: emptyList()
+                HomeResponse.ReactionInfo(count, reactors)
             }
 
             HomeResponse.FeedResponse.from(post, allReactions)
@@ -149,5 +161,57 @@ class PostService(
             selectedDate = selectedDate,
             posts = dailyPosts,
         )
+    }
+
+    /**
+     * 내 기록 조회 (마이페이지용)
+     * - 로그인한 사용자의 모든 게시글
+     * - 실제 Reaction 개수 집계
+     * - 최신순 정렬
+     *
+     * @param member 조회할 사용자
+     * @return FeedResponse 리스트
+     */
+    fun getMyFeedList(member: Member): List<HomeResponse.FeedResponse> {
+        // 1. 사용자의 모든 게시글 조회 (페이징 없이 전체)
+        val posts = postRepository.findAllByMemberOrderByCreatedAtDesc(
+            member,
+            Pageable.unpaged()
+        ).content
+
+        // 2. 모든 게시글의 리액션 개수 집계
+        val reactionCounts = reactionRepository.countByPostsGroupByType(posts)
+
+        // 3. 모든 게시글의 최근 반응자 조회
+        val reactionReactors = reactionRepository.findRecentReactorsByPosts(posts)
+
+        // 4. Post ID별로 ReactionType -> Count 맵 생성
+        val reactionCountMap = reactionCounts
+            .groupBy { it.getPostId() }
+            .mapValues { (_, projections) ->
+                projections.associate { it.getReactionType() to it.getCount().toInt() }
+            }
+
+        // 5. Post ID별, ReactionType별로 최근 반응자 리스트 생성 (최대 3명)
+        val reactionReactorMap = reactionReactors
+            .groupBy { it.getPostId() to it.getReactionType() }
+            .mapValues { (_, projections) ->
+                projections.take(3).map { it.getReactorNickname() }
+            }
+
+        // 6. Post 엔티티를 FeedResponse로 변환
+        return posts.map { post ->
+            val postId = post.id ?: 0L
+            val postCountMap = reactionCountMap[postId] ?: emptyMap()
+
+            // 모든 ReactionType에 대해 ReactionInfo 생성
+            val allReactions = ReactionType.entries.associateWith { type ->
+                val count = postCountMap[type] ?: 0
+                val reactors = reactionReactorMap[postId to type] ?: emptyList()
+                HomeResponse.ReactionInfo(count, reactors)
+            }
+
+            HomeResponse.FeedResponse.from(post, allReactions)
+        }
     }
 }

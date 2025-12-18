@@ -8,7 +8,7 @@
 </head>
 <body class="bg-white min-h-screen pb-24">
 
-<div th:replace="~{fragments/layout :: header('👑')}"></div>
+<div th:replace="~{fragments/layout :: header(${hasPostedToday ? '👑' : '🐢'})}"></div>
 
 <main class="max-w-3xl mx-auto px-4 py-6 space-y-8">
 
@@ -49,11 +49,115 @@
         </form>
     </section>
 
+    <!-- 내 기록 섹션 -->
+    <section>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">내 기록</h2>
+
+        <div th:if="${myFeedList != null && !myFeedList.isEmpty()}" class="space-y-4">
+            <div th:each="item : ${myFeedList}">
+                <div th:replace="~{fragments/feed :: feedItem(${item}, 'absolute', false)}"></div>
+            </div>
+        </div>
+
+        <div th:if="${myFeedList == null || myFeedList.isEmpty()}" class="text-center py-12">
+            <p class="text-gray-500 text-lg mb-2">아직 기록이 없어요</p>
+            <p class="text-gray-400 text-sm">오늘의 순간을 기록해보세요! ✨</p>
+        </div>
+    </section>
+
 </main>
 
 <div th:replace="~{fragments/layout :: navbar('mypage', ${hasPostedToday})}"></div>
 
-<div th:replace="~{fragments/layout :: uploadBtnScript(${hasPostedToday})}"></div>
+<!-- Image Viewer Modal (home.html과 동일) -->
+<div id="imageViewerModal" class="hidden fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm">
+    <button
+            onclick="closeImageViewer()"
+            class="absolute top-4 right-4 z-[110] w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full text-white text-2xl transition">
+        ✕
+    </button>
+
+    <div class="w-full h-full flex items-center justify-center p-4 overflow-auto" id="imageContainer">
+        <img
+                id="viewerImage"
+                src=""
+                alt="Original Image"
+                onclick="toggleZoom()"
+                class="max-w-full max-h-full object-contain rounded-lg cursor-zoom-in transition-transform duration-300"
+        />
+    </div>
+
+    <div onclick="closeImageViewer()" class="absolute inset-0 -z-10"></div>
+</div>
+
+<div th:replace="~{fragments/layout :: alreadyPostedModal}"></div>
+
+<script th:inline="javascript">
+    // ==================== Upload Button Click Handler ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadBtn = document.getElementById('uploadBtn');
+        const hasPostedToday = /*[[${hasPostedToday}]]*/ false;
+        uploadBtn.addEventListener('click', function() {
+            if (hasPostedToday) {
+                openAlreadyPostedModal();
+            } else {
+                location.href = '/kkumo/v1/post/create';
+            }
+        });
+    });
+
+    // ==================== Image Viewer (Lightbox) Functions ====================
+    let isZoomed = false;
+
+    function openImageViewer(originalUrl) {
+        const modal = document.getElementById('imageViewerModal');
+        const viewerImage = document.getElementById('viewerImage');
+        modal.classList.remove('hidden');
+        viewerImage.src = originalUrl;
+        document.body.style.overflow = 'hidden';
+        isZoomed = false;
+        viewerImage.classList.remove('scale-150');
+        viewerImage.classList.add('cursor-zoom-in');
+        viewerImage.classList.remove('cursor-zoom-out');
+    }
+
+    function closeImageViewer() {
+        const modal = document.getElementById('imageViewerModal');
+        const viewerImage = document.getElementById('viewerImage');
+        modal.classList.add('hidden');
+        viewerImage.src = '';
+        document.body.style.overflow = '';
+        isZoomed = false;
+        viewerImage.classList.remove('scale-150');
+        viewerImage.classList.add('cursor-zoom-in');
+        viewerImage.classList.remove('cursor-zoom-out');
+    }
+
+    function toggleZoom() {
+        const viewerImage = document.getElementById('viewerImage');
+        isZoomed = !isZoomed;
+        if (isZoomed) {
+            viewerImage.classList.add('scale-150');
+            viewerImage.classList.remove('cursor-zoom-in');
+            viewerImage.classList.add('cursor-zoom-out');
+        } else {
+            viewerImage.classList.remove('scale-150');
+            viewerImage.classList.add('cursor-zoom-in');
+            viewerImage.classList.remove('cursor-zoom-out');
+        }
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const modal = document.getElementById('imageViewerModal');
+            if (!modal.classList.contains('hidden')) {
+                closeImageViewer();
+            }
+        }
+    });
+</script>
+
+<div th:replace="~{fragments/layout :: alreadyPostedModalScript}"></div>
 
 </body>
 </html>

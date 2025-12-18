@@ -36,7 +36,7 @@ class PostViewController(
     }
 
     @GetMapping("/home")
-    fun homePage2(
+    fun homePage(
         @AuthenticationPrincipal user: CustomUserDetails,
         @RequestParam(required = false) date: String?,
         model: Model

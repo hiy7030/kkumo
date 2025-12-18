@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<!-- ==================== Feed Item Fragment ==================== -->
+<!--
+    Parameters:
+    - item: FeedResponse 객체
+    - dateStyle: 'relative' (상대 시간, 예: "5분 전") 또는 'absolute' (절대 시간, 예: "2025년 12월 17일")
+    - interactive: true (홈, 리액션 클릭 가능) 또는 false (마이페이지, 조회 전용)
+-->
+<div th:fragment="feedItem(item, dateStyle, interactive)" class="bg-white rounded-xl shadow-sm overflow-hidden border border-[#DBDFEA]">
+    <div class="px-4 pt-4 pb-3 flex items-center justify-between">
+        <div class="flex items-center space-x-2 relative">
+            <div class="relative">
+                <div class="w-10 h-10 rounded-full bg-[#FDF4E3] border border-[#DBDFEA] flex items-center justify-center">
+                    <span class="text-2xl" th:text="${item.writerEmoji}">😊</span>
+                </div>
+                <span th:if="${item.hasCrown}" class="absolute -top-4 -left-1 text-xl transform rotate-[-15deg] drop-shadow-sm">👑</span>
+            </div>
+            <span class="font-bold text-gray-800" th:text="${item.nickname}">닉네임</span>
+        </div>
+
+        <!-- Date Display: Relative vs Absolute -->
+        <span th:if="${dateStyle == 'relative'}"
+              class="text-xs text-gray-500 relative-time"
+              th:data-time="${item.createdAt}">방금 전</span>
+
+        <span th:if="${dateStyle == 'absolute'}"
+              class="text-xs text-gray-500"
+              th:text="${#temporals.format(item.createdAt, 'yyyy년 MM월 dd일')}">2025년 12월 17일</span>
+    </div>
+
+    <div class="px-4">
+        <div class="w-full aspect-square bg-gray-50 rounded-2xl border border-[#DBDFEA] overflow-hidden flex items-center justify-center relative">
+            <img
+                    th:src="${item.thumbnailUrl}"
+                    th:data-original-url="${item.originalImageUrl}"
+                    onclick="openImageViewer(this.getAttribute('data-original-url'))"
+                    alt="Feed Image"
+                    class="w-full h-full object-contain cursor-pointer hover:opacity-90 transition"
+            />
+        </div>
+    </div>
+
+    <div class="p-4">
+        <p class="text-sm text-gray-700 mb-3" th:text="${item.comment}">댓글</p>
+
+        <!-- Reaction Pills Container -->
+        <div class="border-t border-[#DBDFEA] pt-3">
+            <div class="flex items-center gap-2 flex-wrap relative">
+
+                <!-- Existing Reactions (count > 0만 표시) -->
+                <th:block th:each="reactionType : ${T(com.kkumo.domain.reaction.ReactionType).values()}">
+                    <th:block th:with="reactionInfo=${item.reactions.get(reactionType)}">
+                        <th:block th:if="${reactionInfo != null && reactionInfo.count > 0}">
+
+                            <!-- Interactive Mode: 클릭 가능한 버튼 with Tooltip -->
+                            <button th:if="${interactive}"
+                                    th:data-feed-id="${item.id}"
+                                    th:data-reaction-type="${reactionType.name()}"
+                                    onclick="handleReaction(this.getAttribute('data-feed-id'), this.getAttribute('data-reaction-type'))"
+                                    class="reaction-pill relative flex items-center gap-1.5 rounded-full bg-gray-100 hover:bg-gray-200 px-3 py-1 transition active:scale-95 group">
+                                <span class="text-base" th:text="${reactionType.emoji}">❤️</span>
+                                <span class="reaction-count text-xs font-semibold text-gray-700" th:text="${reactionInfo.count}">0</span>
+
+                                <!-- Tooltip -->
+                                <div th:if="${!reactionInfo.recentReactors.isEmpty()}"
+                                     class="reaction-tooltip hidden group-hover:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap z-20 pointer-events-none">
+                                    <span th:text="${#strings.listJoin(reactionInfo.recentReactors, '님, ') + '님'}">
+                                        유저1님, 유저2님
+                                    </span>
+                                    <span th:if="${reactionInfo.count > reactionInfo.recentReactors.size()}"
+                                          th:text="' 외 ' + ${reactionInfo.count - reactionInfo.recentReactors.size()} + '명'">
+                                        외 N명
+                                    </span>
+                                    <!-- Tooltip Arrow -->
+                                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                                        <div class="w-2 h-2 bg-gray-900 rotate-45"></div>
+                                    </div>
+                                </div>
+                            </button>
+
+                            <!-- Read-only Mode: 조회 전용 with Tooltip -->
+                            <div th:if="${!interactive}"
+                                 class="reaction-pill relative flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 cursor-default group">
+                                <span class="text-base" th:text="${reactionType.emoji}">❤️</span>
+                                <span class="reaction-count text-xs font-semibold text-gray-700" th:text="${reactionInfo.count}">0</span>
+
+                                <!-- Tooltip -->
+                                <div th:if="${!reactionInfo.recentReactors.isEmpty()}"
+                                     class="reaction-tooltip hidden group-hover:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap z-20 pointer-events-none">
+                                    <span th:text="${#strings.listJoin(reactionInfo.recentReactors, '님, ') + '님'}">
+                                        유저1님, 유저2님
+                                    </span>
+                                    <span th:if="${reactionInfo.count > reactionInfo.recentReactors.size()}"
+                                          th:text="' 외 ' + ${reactionInfo.count - reactionInfo.recentReactors.size()} + '명'">
+                                        외 N명
+                                    </span>
+                                    <!-- Tooltip Arrow -->
+                                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                                        <div class="w-2 h-2 bg-gray-900 rotate-45"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </th:block>
+                    </th:block>
+                </th:block>
+
+                <!-- Add Reaction Button (Interactive Mode Only) -->
+                <button th:if="${interactive}"
+                        th:data-feed-id="${item.id}"
+                        onclick="toggleReactionPopup(this.getAttribute('data-feed-id'))"
+                        class="add-reaction-btn flex items-center justify-center w-8 h-8 rounded-full border-2 border-[#DBDFEA] hover:border-[#8294C4] hover:bg-gray-50 transition active:scale-95">
+                    <span class="text-gray-600 text-lg leading-none">+</span>
+                </button>
+
+                <!-- Reaction Popup Menu (Interactive Mode Only) -->
+                <div th:if="${interactive}"
+                     th:id="'reaction-popup-' + ${item.id}"
+                     class="reaction-popup hidden absolute bottom-full left-0 mb-2 bg-white rounded-xl shadow-lg border border-[#DBDFEA] p-2 z-10">
+                    <div class="flex gap-1">
+                        <button th:each="reactionType : ${T(com.kkumo.domain.reaction.ReactionType).values()}"
+                                th:data-feed-id="${item.id}"
+                                th:data-reaction-type="${reactionType.name()}"
+                                onclick="handleReactionFromPopup(this.getAttribute('data-feed-id'), this.getAttribute('data-reaction-type'))"
+                                class="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 transition active:scale-95"
+                                th:title="${reactionType.name()}">
+                            <span class="text-2xl" th:text="${reactionType.emoji}">❤️</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== Reaction Script Fragment ==================== -->
+<th:block th:fragment="reactionScript">
+    <script>
+        // ==================== Reaction Queue (Batch Processing) ====================
+        const reactionQueue = [];
+
+        // ==================== Reaction Popup Toggle ====================
+        function toggleReactionPopup(feedId) {
+            const popup = document.getElementById('reaction-popup-' + feedId);
+            if (!popup) return;
+
+            // 다른 팝업들 모두 닫기
+            document.querySelectorAll('.reaction-popup').forEach(p => {
+                if (p.id !== 'reaction-popup-' + feedId) {
+                    p.classList.add('hidden');
+                }
+            });
+
+            // 현재 팝업 토글
+            popup.classList.toggle('hidden');
+        }
+
+        // ==================== Handle Reaction (기존 알약 클릭) ====================
+        function handleReaction(feedId, reactionType) {
+            console.log('Reaction clicked:', feedId, reactionType);
+
+            // 큐에 추가 (배치 처리용)
+            reactionQueue.push({
+                postId: parseInt(feedId),
+                reactionType: reactionType
+            });
+
+            // Optimistic Update: 즉시 UI 업데이트
+            updateReactionCount(feedId, reactionType);
+        }
+
+        // ==================== Handle Reaction from Popup (새 리액션 추가) ====================
+        function handleReactionFromPopup(feedId, reactionType) {
+            console.log('Reaction from popup:', feedId, reactionType);
+
+            // 큐에 추가 (배치 처리용)
+            reactionQueue.push({
+                postId: parseInt(feedId),
+                reactionType: reactionType
+            });
+
+            // Optimistic Update: 즉시 UI 업데이트
+            updateReactionCount(feedId, reactionType);
+
+            // 팝업 닫기
+            toggleReactionPopup(feedId);
+        }
+
+        // ==================== Update Reaction Count in DOM ====================
+        function updateReactionCount(feedId, reactionType) {
+            console.log('updateReactionCount called:', feedId, reactionType);
+
+            // 해당 피드의 리액션 컨테이너 찾기
+            const selector = `button.reaction-pill[data-feed-id="${feedId}"][data-reaction-type="${reactionType}"]`;
+            const feedElement = document.querySelector(selector);
+
+            if (feedElement) {
+                // 기존 알약이 있는 경우: 숫자만 증가
+                const countElement = feedElement.querySelector('.reaction-count');
+
+                if (countElement) {
+                    let currentCount = parseInt(countElement.textContent);
+                    countElement.textContent = currentCount + 1;
+
+                    // 시각적 피드백
+                    countElement.classList.add('text-[#8294C4]', 'font-bold');
+                    setTimeout(() => {
+                        countElement.classList.remove('text-[#8294C4]', 'font-bold');
+                    }, 300);
+                }
+            } else {
+                // 새로운 리액션인 경우: 동적으로 알약 생성
+                createNewReactionPill(feedId, reactionType);
+            }
+        }
+
+        // ==================== Create New Reaction Pill Dynamically ====================
+        function createNewReactionPill(feedId, reactionType) {
+            console.log('Creating new reaction pill:', feedId, reactionType);
+
+            // 리액션 이모지 매핑 (ReactionType Enum과 동기화)
+            const reactionEmojis = {
+                'LIKE': '👍',
+                'FIRE': '🔥',
+                'HEART': '❤️',
+                'CLAP': '👏',
+                'SAD': '😢'
+            };
+
+            const emoji = reactionEmojis[reactionType] || '❓';
+
+            // 해당 피드의 리액션 컨테이너 찾기
+            const containers = document.querySelectorAll(`[data-feed-id="${feedId}"]`);
+            let reactionContainer = null;
+
+            // 리액션 알약들이 있는 컨테이너 찾기
+            containers.forEach(container => {
+                if (container.classList.contains('add-reaction-btn')) {
+                    reactionContainer = container.parentElement;
+                }
+            });
+
+            if (!reactionContainer) {
+                console.error('Reaction container not found');
+                location.reload();
+                return;
+            }
+
+            // + 버튼 찾기
+            const addButton = reactionContainer.querySelector('.add-reaction-btn');
+            if (!addButton) {
+                console.error('Add button not found');
+                location.reload();
+                return;
+            }
+
+            // 새 알약 생성
+            const newPill = document.createElement('button');
+            newPill.setAttribute('data-feed-id', feedId);
+            newPill.setAttribute('data-reaction-type', reactionType);
+            newPill.onclick = function() {
+                handleReaction(this.getAttribute('data-feed-id'), this.getAttribute('data-reaction-type'));
+            };
+            newPill.className = 'reaction-pill flex items-center gap-1.5 rounded-full bg-gray-100 hover:bg-gray-200 px-3 py-1 transition active:scale-95';
+
+            newPill.innerHTML = `
+                <span class="text-base">${emoji}</span>
+                <span class="reaction-count text-xs font-semibold text-gray-700">1</span>
+            `;
+
+            // + 버튼 바로 앞에 삽입
+            reactionContainer.insertBefore(newPill, addButton);
+
+            // 시각적 피드백 (등장 애니메이션)
+            newPill.style.opacity = '0';
+            newPill.style.transform = 'scale(0.8)';
+            setTimeout(() => {
+                newPill.style.transition = 'all 0.3s ease-out';
+                newPill.style.opacity = '1';
+                newPill.style.transform = 'scale(1)';
+            }, 10);
+        }
+
+        // ==================== Batch Send Reactions on Page Unload ====================
+        function sendReactionsBatch() {
+            if (reactionQueue.length === 0) {
+                console.log('No reactions to send');
+                return;
+            }
+
+            const payload = JSON.stringify({ reactions: reactionQueue });
+            console.log('Sending batch reactions:', reactionQueue);
+
+            // 방법 1: Fetch API with keepalive (권장)
+            fetch('/kkumo/v1/reactions/batch', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: payload,
+                keepalive: true  // 페이지 종료 후에도 요청 완료 보장
+            }).then(response => {
+                console.log('Batch send response:', response.status);
+            }).catch(error => {
+                console.error('Batch send failed:', error);
+            });
+
+            // 방법 2: navigator.sendBeacon (대안, 단 JSON 전송이 제한적)
+            // const blob = new Blob([payload], { type: 'application/json' });
+            // navigator.sendBeacon('/kkumo/v1/reactions/batch', blob);
+
+            // 큐 비우기
+            reactionQueue.length = 0;
+        }
+
+        // pagehide 이벤트: 페이지 이탈 시 배치 전송
+        window.addEventListener('pagehide', function(event) {
+            console.log('Page hide event triggered');
+            sendReactionsBatch();
+        });
+
+        // beforeunload 이벤트: pagehide를 지원하지 않는 브라우저 대비
+        window.addEventListener('beforeunload', function(event) {
+            console.log('Before unload event triggered');
+            sendReactionsBatch();
+        });
+
+        // ==================== Close Popup on Outside Click ====================
+        document.addEventListener('click', function(event) {
+            // 클릭된 요소가 팝업이나 + 버튼이 아니면 모든 팝업 닫기
+            if (!event.target.closest('.reaction-popup') && !event.target.closest('.add-reaction-btn')) {
+                document.querySelectorAll('.reaction-popup').forEach(popup => {
+                    popup.classList.add('hidden');
+                });
+            }
+        });
+    </script>
+</th:block>
+
+</body>
+</html>

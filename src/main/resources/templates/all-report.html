@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전체 멤버 기록 현황 - KKUMO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white min-h-screen pb-24">
+
+<div th:replace="~{fragments/layout :: header(${hasPostedToday ? '👑' : '🐢'})}"></div>
+
+<main class="max-w-3xl mx-auto px-4 py-6">
+
+    <!-- Month Navigation -->
+    <section class="mb-8">
+        <div class="flex items-center justify-center gap-6">
+            <a th:href="@{/kkumo/v1/reports/all(year=${prevYear}, month=${prevMonth})}"
+               class="text-3xl text-[#8294C4] hover:text-[#6E80B0] transition active:scale-95">
+                ◀
+            </a>
+
+            <h1 class="text-2xl font-bold text-slate-800">
+                <span th:text="${year}">2024</span>년 <span th:text="${month}">12</span>월
+            </h1>
+
+            <a th:if="${!isCurrentMonth}"
+               th:href="@{/kkumo/v1/reports/all(year=${nextYear}, month=${nextMonth})}"
+               class="text-3xl text-[#8294C4] hover:text-[#6E80B0] transition active:scale-95">
+                ▶
+            </a>
+            <span th:if="${isCurrentMonth}" class="text-3xl text-gray-300 cursor-not-allowed">
+                ▶
+            </span>
+        </div>
+    </section>
+
+    <!-- Daily Summary Cards (Vertical List) -->
+    <section class="space-y-6">
+        <div th:each="summary : ${dailySummaries}" class="bg-white rounded-2xl shadow-sm border border-[#DBDFEA] p-5">
+
+            <!-- Card Header -->
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#DBDFEA]">
+                <!-- 날짜 및 요일 -->
+                <div class="flex items-baseline gap-2">
+                    <span th:text="${#temporals.format(summary.date, 'MM.dd')}" class="text-xl font-bold text-slate-800">12.18</span>
+                    <span th:text="'(' + ${summary.dayOfWeek} + ')'" class="text-sm text-slate-500">(수)</span>
+                </div>
+
+                <!-- 참여 현황 -->
+                <div class="flex items-center gap-1">
+                    <span class="text-lg">🔥</span>
+                    <span class="text-lg font-bold">
+                        <span th:text="${summary.postedMembers.size()}" class="text-[#8294C4]">15</span>
+                        <span class="text-slate-400">/</span>
+                        <span th:text="${summary.totalMemberCount}" class="text-slate-600">20</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Card Body: 기록한 멤버 (Success Group) -->
+            <div th:if="${!summary.postedMembers.isEmpty()}" class="mb-4">
+                <div class="flex flex-wrap gap-4">
+                    <div th:each="member : ${summary.postedMembers}"
+                         class="flex flex-col items-center gap-1">
+                        <span th:text="${member.emoji}" class="text-3xl">😀</span>
+                        <span th:text="${member.nickname}" class="text-xs text-slate-600">닉네임</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 기록한 멤버가 없을 때 -->
+            <div th:if="${summary.postedMembers.isEmpty()}" class="mb-4 text-center py-6">
+                <p class="text-slate-400 text-sm">아직 아무도 기록하지 않았어요 😢</p>
+            </div>
+
+            <!-- Card Footer: 미참여자 또는 완료 메시지 -->
+            <div th:if="${!summary.notPostedMembers.isEmpty()}" class="pt-3 border-t border-[#DBDFEA]">
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    <span>💤 미참여: </span>
+                    <span th:each="member, iterStat : ${summary.notPostedMembers}">
+                        <span th:text="${member.nickname}">닉네임</span><span th:if="${!iterStat.last}">, </span>
+                    </span>
+                </p>
+            </div>
+
+            <!-- 모두 참여 성공 메시지 -->
+            <div th:if="${summary.notPostedMembers.isEmpty() && !summary.postedMembers.isEmpty()}"
+                 class="pt-3 border-t border-[#DBDFEA] text-center">
+                <p class="text-sm text-[#8294C4] font-medium">모두 참여 성공! 🎉</p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Empty State (데이터가 없을 때) -->
+    <div th:if="${dailySummaries.isEmpty()}" class="text-center py-12">
+        <p class="text-slate-400 text-lg">이 달의 기록이 없습니다.</p>
+    </div>
+
+</main>
+
+<div th:replace="~{fragments/layout :: navbar('report', ${hasPostedToday})}"></div>
+
+<div th:replace="~{fragments/layout :: alreadyPostedModal}"></div>
+
+<script th:inline="javascript">
+    // Upload Button Click Handler
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadBtn = document.getElementById('uploadBtn');
+        const hasPostedToday = /*[[${hasPostedToday}]]*/ false;
+        uploadBtn.addEventListener('click', function() {
+            if (hasPostedToday) {
+                openAlreadyPostedModal();
+            } else {
+                location.href = '/kkumo/v1/post/create';
+            }
+        });
+    });
+</script>
+
+<div th:replace="~{fragments/layout :: alreadyPostedModalScript}"></div>
+
+</body>
+</html>
