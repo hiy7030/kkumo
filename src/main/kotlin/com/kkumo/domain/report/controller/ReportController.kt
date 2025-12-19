@@ -1,10 +1,13 @@
 package com.kkumo.domain.report.controller
 
 import com.kkumo.domain.member.Member
+import com.kkumo.domain.member.repository.MemberRepository
 import com.kkumo.domain.post.repository.PostRepository
 import com.kkumo.domain.report.service.ReportService
 import com.kkumo.global.annotation.KKumoWebController
 import com.kkumo.global.auth.CustomUserDetails
+import com.kkumo.global.error.BusinessException
+import com.kkumo.global.error.ErrorCode
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -17,7 +20,9 @@ import java.time.temporal.ChronoUnit
 @KKumoWebController
 class ReportController(
     private val postRepository: PostRepository,
-    private val reportService: ReportService
+    private val reportService: ReportService,
+    private val memberRepository: MemberRepository,
+    private val kkumoProperties: com.kkumo.global.config.KkumoProperties,
 ) {
 
     @GetMapping("/reports/my")
@@ -27,7 +32,9 @@ class ReportController(
         @AuthenticationPrincipal userDetails: CustomUserDetails,
         model: Model
     ): String {
-        val member = userDetails.member
+        // DB에서 최신 Member 정보를 조회하여 hasPostedToday가 정확히 반영되도록 함
+        val member = memberRepository.findById(userDetails.member.id)
+            .orElseThrow { BusinessException(ErrorCode.MEMBER_NOT_FOUND) }
 
         // 현재 연/월 또는 요청된 연/월 사용
         val targetYearMonth = if (year != null && month != null) {
@@ -72,7 +79,11 @@ class ReportController(
         // 현재 월인지 확인
         val currentYearMonth = YearMonth.now()
         val isCurrentMonth = targetYearMonth == currentYearMonth
-        val hasPostedToday = userDetails.member.lastPostedAt == LocalDate.now()
+        val hasPostedToday = member.lastPostedAt == LocalDate.now()
+
+        // Base Date 관련 네비게이션 제어
+        val baseYearMonth = YearMonth.from(kkumoProperties.baseDate)
+        val isPrevMonthAllowed = targetYearMonth.isAfter(baseYearMonth)
 
         // 모델에 데이터 전달
         model.addAttribute("year", targetYear)
@@ -86,6 +97,7 @@ class ReportController(
         model.addAttribute("today", LocalDate.now())
         model.addAttribute("hasPostedToday", hasPostedToday)
         model.addAttribute("isCurrentMonth", isCurrentMonth)
+        model.addAttribute("isPrevMonthAllowed", isPrevMonthAllowed)
 
         return "my-report"
     }
@@ -97,6 +109,10 @@ class ReportController(
         @AuthenticationPrincipal userDetails: CustomUserDetails,
         model: Model
     ): String {
+        // DB에서 최신 Member 정보를 조회하여 hasPostedToday가 정확히 반영되도록 함
+        val member = memberRepository.findById(userDetails.member.id)
+            .orElseThrow { BusinessException(ErrorCode.MEMBER_NOT_FOUND) }
+
         // 현재 연/월 또는 요청된 연/월 사용
         val targetYearMonth = if (year != null && month != null) {
             YearMonth.of(year, month)
@@ -117,7 +133,11 @@ class ReportController(
         // 현재 월인지 확인
         val currentYearMonth = YearMonth.now()
         val isCurrentMonth = targetYearMonth == currentYearMonth
-        val hasPostedToday = userDetails.member.lastPostedAt == LocalDate.now()
+        val hasPostedToday = member.lastPostedAt == LocalDate.now()
+
+        // Base Date 관련 네비게이션 제어
+        val baseYearMonth = YearMonth.from(kkumoProperties.baseDate)
+        val isPrevMonthAllowed = targetYearMonth.isAfter(baseYearMonth)
 
         // 모델에 데이터 전달
         model.addAttribute("year", targetYear)
@@ -129,6 +149,7 @@ class ReportController(
         model.addAttribute("nextMonth", nextYearMonth.monthValue)
         model.addAttribute("isCurrentMonth", isCurrentMonth)
         model.addAttribute("hasPostedToday", hasPostedToday)
+        model.addAttribute("isPrevMonthAllowed", isPrevMonthAllowed)
 
         return "all-report"
     }

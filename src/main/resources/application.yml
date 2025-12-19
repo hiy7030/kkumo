@@ -42,3 +42,6 @@ cloud:
       auto: false
     stack:
       auto: false
+
+kkumo:
+  base-date: 2025-12-01

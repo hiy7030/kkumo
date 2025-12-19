@@ -8,6 +8,8 @@ import java.time.LocalDate
 
 interface MemberRepository : JpaRepository<Member, String> {
     fun findByEmail(email: String): Member?
+    fun findByNickname(nickname: String): Member?
+    fun findByMyEmoji(emoji: String): Member?
     fun existsByEmail(email: String): Boolean
     fun existsByNickname(nickname: String): Boolean
     fun existsByMyEmoji(emoji: String): Boolean

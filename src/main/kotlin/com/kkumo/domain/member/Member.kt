@@ -60,4 +60,16 @@ class Member(
         // 3. 마지막 작성 날짜 갱신
         lastPostedAt = postedDate
     }
+
+    /**
+     * 프로필 정보 업데이트 (닉네임, 이모지)
+     * JPA Dirty Checking을 통해 자동으로 DB에 반영됨
+     *
+     * @param nickname 변경할 닉네임
+     * @param myEmoji 변경할 이모지
+     */
+    fun update(nickname: String, myEmoji: String) {
+        this.nickname = nickname
+        this.myEmoji = myEmoji
+    }
 }

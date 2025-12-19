@@ -62,10 +62,12 @@
                             <button th:if="${interactive}"
                                     th:data-feed-id="${item.id}"
                                     th:data-reaction-type="${reactionType.name()}"
-                                    onclick="handleReaction(this.getAttribute('data-feed-id'), this.getAttribute('data-reaction-type'))"
-                                    class="reaction-pill relative flex items-center gap-1.5 rounded-full bg-gray-100 hover:bg-gray-200 px-3 py-1 transition active:scale-95 group">
+                                    th:data-reacted="${reactionInfo.isMeReacted}"
+                                    th:classappend="${reactionInfo.isMeReacted ? 'bg-[#ACB1D6] text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}"
+                                    onclick="handleReaction(this.getAttribute('data-feed-id'), this.getAttribute('data-reaction-type'), this)"
+                                    class="reaction-pill relative flex items-center gap-1.5 rounded-full px-3 py-1 transition active:scale-95 group">
                                 <span class="text-base" th:text="${reactionType.emoji}">❤️</span>
-                                <span class="reaction-count text-xs font-semibold text-gray-700" th:text="${reactionInfo.count}">0</span>
+                                <span class="reaction-count text-xs font-semibold" th:text="${reactionInfo.count}">0</span>
 
                                 <!-- Tooltip -->
                                 <div th:if="${!reactionInfo.recentReactors.isEmpty()}"
@@ -162,18 +164,18 @@
             popup.classList.toggle('hidden');
         }
 
-        // ==================== Handle Reaction (기존 알약 클릭) ====================
-        function handleReaction(feedId, reactionType) {
+        // ==================== Handle Reaction (기존 알약 클릭 - Toggle 방식) ====================
+        function handleReaction(feedId, reactionType, element) {
             console.log('Reaction clicked:', feedId, reactionType);
 
-            // 큐에 추가 (배치 처리용)
+            // 큐에 추가 (배치 처리용 - 백엔드에서 토글 처리)
             reactionQueue.push({
                 postId: parseInt(feedId),
                 reactionType: reactionType
             });
 
-            // Optimistic Update: 즉시 UI 업데이트
-            updateReactionCount(feedId, reactionType);
+            // Optimistic Update: 즉시 UI 토글
+            toggleReactionUI(feedId, reactionType, element);
         }
 
         // ==================== Handle Reaction from Popup (새 리액션 추가) ====================
@@ -186,42 +188,69 @@
                 reactionType: reactionType
             });
 
-            // Optimistic Update: 즉시 UI 업데이트
-            updateReactionCount(feedId, reactionType);
+            // Optimistic Update: 새 리액션 생성
+            const selector = `button.reaction-pill[data-feed-id="${feedId}"][data-reaction-type="${reactionType}"]`;
+            const existingPill = document.querySelector(selector);
+
+            if (existingPill) {
+                // 이미 존재하는 경우 토글
+                toggleReactionUI(feedId, reactionType, existingPill);
+            } else {
+                // 새로 생성 (항상 활성화 상태로)
+                createNewReactionPill(feedId, reactionType);
+            }
 
             // 팝업 닫기
             toggleReactionPopup(feedId);
         }
 
-        // ==================== Update Reaction Count in DOM ====================
-        function updateReactionCount(feedId, reactionType) {
-            console.log('updateReactionCount called:', feedId, reactionType);
+        // ==================== Toggle Reaction UI (활성화/비활성화) ====================
+        function toggleReactionUI(feedId, reactionType, element) {
+            console.log('toggleReactionUI called:', feedId, reactionType);
 
-            // 해당 피드의 리액션 컨테이너 찾기
-            const selector = `button.reaction-pill[data-feed-id="${feedId}"][data-reaction-type="${reactionType}"]`;
-            const feedElement = document.querySelector(selector);
+            const countElement = element.querySelector('.reaction-count');
+            if (!countElement) return;
 
-            if (feedElement) {
-                // 기존 알약이 있는 경우: 숫자만 증가
-                const countElement = feedElement.querySelector('.reaction-count');
+            let currentCount = parseInt(countElement.textContent);
+            const isReacted = element.getAttribute('data-reacted') === 'true';
 
-                if (countElement) {
-                    let currentCount = parseInt(countElement.textContent);
-                    countElement.textContent = currentCount + 1;
+            if (isReacted) {
+                // Case A: 취소 동작 (비활성화)
+                currentCount = Math.max(0, currentCount - 1);
+                countElement.textContent = currentCount;
+                element.setAttribute('data-reacted', 'false');
 
-                    // 시각적 피드백
-                    countElement.classList.add('text-[#8294C4]', 'font-bold');
+                // 스타일 제거 (회색으로 복귀)
+                element.classList.remove('bg-[#ACB1D6]', 'text-white');
+                element.classList.add('bg-gray-100', 'hover:bg-gray-200', 'text-gray-700');
+
+                // 카운트가 0이 되면 알약 제거
+                if (currentCount === 0) {
+                    element.style.opacity = '0';
+                    element.style.transform = 'scale(0.8)';
                     setTimeout(() => {
-                        countElement.classList.remove('text-[#8294C4]', 'font-bold');
+                        element.remove();
                     }, 300);
                 }
             } else {
-                // 새로운 리액션인 경우: 동적으로 알약 생성
-                createNewReactionPill(feedId, reactionType);
+                // Case B: 추가 동작 (활성화)
+                currentCount = currentCount + 1;
+                countElement.textContent = currentCount;
+                element.setAttribute('data-reacted', 'true');
+
+                // 스타일 추가 (강조색 적용)
+                element.classList.remove('bg-gray-100', 'hover:bg-gray-200', 'text-gray-700');
+                element.classList.add('bg-[#ACB1D6]', 'text-white');
+
+                // 시각적 피드백
+                element.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    element.style.transform = 'scale(1)';
+                }, 200);
             }
         }
 
-        // ==================== Create New Reaction Pill Dynamically ====================
+        // ==================== Create New Reaction Pill Dynamically (항상 활성화 상태로) ====================
         function createNewReactionPill(feedId, reactionType) {
             console.log('Creating new reaction pill:', feedId, reactionType);
 
@@ -261,18 +290,20 @@
                 return;
             }
 
-            // 새 알약 생성
+            // 새 알약 생성 (활성화 상태로)
             const newPill = document.createElement('button');
             newPill.setAttribute('data-feed-id', feedId);
             newPill.setAttribute('data-reaction-type', reactionType);
+            newPill.setAttribute('data-reacted', 'true');  // 활성화 상태
             newPill.onclick = function() {
-                handleReaction(this.getAttribute('data-feed-id'), this.getAttribute('data-reaction-type'));
+                handleReaction(this.getAttribute('data-feed-id'), this.getAttribute('data-reaction-type'), this);
             };
-            newPill.className = 'reaction-pill flex items-center gap-1.5 rounded-full bg-gray-100 hover:bg-gray-200 px-3 py-1 transition active:scale-95';
+            // 활성화 상태 스타일 적용
+            newPill.className = 'reaction-pill relative flex items-center gap-1.5 rounded-full bg-[#ACB1D6] text-white px-3 py-1 transition active:scale-95 group';
 
             newPill.innerHTML = `
                 <span class="text-base">${emoji}</span>
-                <span class="reaction-count text-xs font-semibold text-gray-700">1</span>
+                <span class="reaction-count text-xs font-semibold">1</span>
             `;
 
             // + 버튼 바로 앞에 삽입

@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>마이페이지 - KKUMO</title>
+    <meta th:replace="~{fragments/layout :: viewTransitionMeta}" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <th:block th:replace="~{fragments/layout :: alreadyPostedModalStyle}"></th:block>
+    <style th:replace="~{fragments/layout :: fadeInAnimation}"></style>
 </head>
 <body class="bg-white min-h-screen pb-24">
 
@@ -37,16 +40,27 @@
             </p>
         </div>
 
-        <!-- 로그아웃 버튼 -->
-        <form th:action="@{/logout}" method="post" class="mt-6">
+        <!-- 닉첸 / 로그아웃 버튼 -->
+        <div class="grid grid-cols-2 gap-3 mt-6">
             <button
-                type="submit"
-                class="w-full bg-[#DBDFEA] hover:bg-[#ACB1D6] text-[#8294C4] hover:text-white font-bold py-3 rounded-xl transition-colors duration-200 flex items-center justify-center space-x-2"
+                    type="button"
+                    onclick="openProfileUpdateModal()"
+                    class="w-full bg-[#DBDFEA] hover:bg-[#ACB1D6] text-[#8294C4] hover:text-white font-bold py-3 rounded-xl transition-colors duration-200 flex items-center justify-center space-x-2"
             >
-                <span class="text-xl">🚪</span>
-                <span>로그아웃</span>
+                <span class="text-xl">✏️</span>
+                <span>닉첸</span>
             </button>
-        </form>
+
+            <form th:action="@{/logout}" method="post" class="m-0">
+                <button
+                        type="submit"
+                        class="w-full bg-[#FFA7A7] hover:bg-[#FF9090] text-white font-bold py-3 rounded-xl transition-colors duration-200 flex items-center justify-center space-x-2"
+                >
+                    <span class="text-xl">🚪</span>
+                    <span>로그아웃</span>
+                </button>
+            </form>
+        </div>
     </section>
 
     <!-- 내 기록 섹션 -->
@@ -91,6 +105,82 @@
 </div>
 
 <div th:replace="~{fragments/layout :: alreadyPostedModal}"></div>
+
+<!-- Profile Update Modal -->
+<div id="profileUpdateModal" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full border border-[#DBDFEA]">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">닉첸하기</h2>
+
+        <form id="profileUpdateForm" class="space-y-4">
+            <!-- 닉네임 입력 -->
+            <div>
+                <label for="updateNickname" class="block text-sm font-semibold text-gray-700 mb-2">닉네임 (2~20자)</label>
+                <input
+                    type="text"
+                    id="updateNickname"
+                    name="nickname"
+                    required
+                    minlength="2"
+                    maxlength="20"
+                    th:value="${memberNickname}"
+                    class="w-full px-4 py-3 rounded-xl border border-[#DBDFEA] focus:ring-2 focus:ring-[#ACB1D6] focus:border-[#8294C4] outline-none transition"
+                />
+            </div>
+
+            <!-- 이모지 선택 -->
+            <div class="relative">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">나만의 이모지 선택 (👑 제외)</label>
+                <div class="flex items-center gap-3">
+                    <button
+                        type="button"
+                        id="updateEmojiTriggerBtn"
+                        class="w-full bg-white border-2 border-[#DBDFEA] text-gray-500 hover:border-[#8294C4] hover:text-[#8294C4] font-medium py-3 px-4 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-sm text-lg"
+                    >
+                        <span id="updateBtnIcon" th:text="${memberEmoji}">😊</span>
+                        <span id="updateEmojiBtnText">이모지를 골라보세요</span>
+                    </button>
+                    <input type="hidden" id="updateMyEmoji" name="myEmoji" th:value="${memberEmoji}" required />
+                </div>
+                <p class="text-xs text-[#ACB1D6] mt-1 ml-1">* 왕관(👑)은 꾸모 공식 로고라 사용할 수 없어요.</p>
+            </div>
+
+            <!-- 에러 메시지 -->
+            <p id="updateErrorMsg" class="text-red-500 text-sm hidden"></p>
+
+            <!-- 버튼 -->
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button
+                    type="button"
+                    onclick="closeProfileUpdateModal()"
+                    class="bg-[#DBDFEA] hover:bg-[#ACB1D6] text-gray-700 font-bold py-3 rounded-xl transition-colors duration-200"
+                >
+                    취소
+                </button>
+                <button
+                    type="submit"
+                    class="bg-[#8294C4] hover:bg-[#6E80B0] text-white font-bold py-3 rounded-xl transition-colors duration-200"
+                >
+                    변경하기
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Update Success Modal -->
+<div id="updateSuccessModal" class="hidden fixed inset-0 z-[110] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-lg p-8 max-w-sm w-full border border-[#DBDFEA] text-center">
+        <div class="text-5xl mb-4">✨</div>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">닉첸 완료!</h2>
+        <p class="text-gray-600 mb-6">닉첸이 완료되었습니다.</p>
+        <button
+            onclick="location.reload()"
+            class="w-full bg-[#8294C4] hover:bg-[#6E80B0] text-white font-bold py-3 rounded-full transition-colors duration-200"
+        >
+            확인
+        </button>
+    </div>
+</div>
 
 <script th:inline="javascript">
     // ==================== Upload Button Click Handler ====================
@@ -158,6 +248,151 @@
 </script>
 
 <div th:replace="~{fragments/layout :: alreadyPostedModalScript}"></div>
+
+<!-- Profile Update Modal Script -->
+<script type="module">
+    import { EmojiButton } from 'https://unpkg.com/@joeattardi/emoji-button@4.6.4/dist/index.js';
+
+    const triggerBtn = document.querySelector('#updateEmojiTriggerBtn');
+    const hiddenInput = document.querySelector('#updateMyEmoji');
+    const btnText = document.querySelector('#updateEmojiBtnText');
+    const btnIcon = document.querySelector('#updateBtnIcon');
+
+    // 이모지 피커 설정
+    const picker = new EmojiButton({
+        position: 'bottom-start',
+        zIndex: 9999,
+        rows: 6,
+        recentsCount: 10,
+        showPreview: false,
+        initialCategory: 'smileys',
+        i18n: {
+            search: '검색...',
+            categories: {
+                recents: '최근 사용',
+                smileys: '감정',
+                people: '사람',
+                animals: '동물',
+                food: '음식',
+                activities: '활동',
+                travel: '여행',
+                objects: '사물',
+                symbols: '기호',
+                flags: '국기'
+            },
+            notFound: '결과 없음'
+        }
+    });
+
+    picker.on('emoji', selection => {
+        const selectedEmoji = selection.emoji;
+
+        if (selectedEmoji === '👑') {
+            showUpdateError("👑 왕관은 사용할 수 없습니다.");
+            return;
+        }
+
+        btnIcon.innerText = selectedEmoji;
+        btnText.innerText = "선택 완료!";
+        triggerBtn.classList.add("border-[#8294C4]", "bg-[#FDF4E3]", "text-gray-900");
+        triggerBtn.classList.remove("border-[#DBDFEA]", "text-gray-500");
+
+        hiddenInput.value = selectedEmoji;
+        hideUpdateError();
+    });
+
+    triggerBtn.addEventListener('click', () => {
+        picker.togglePicker(triggerBtn);
+    });
+
+    // 프로필 업데이트 폼 제출
+    document.getElementById('profileUpdateForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const nickname = document.getElementById('updateNickname').value;
+        const myEmoji = hiddenInput.value;
+
+        if (!myEmoji) {
+            showUpdateError('이모지를 선택해주세요!');
+            return;
+        }
+
+        try {
+            const response = await fetch('/kkumo/v1/members', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nickname, myEmoji })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                closeProfileUpdateModal();
+                openUpdateSuccessModal();
+            } else {
+                const errorMsg = result.error?.message || '변경에 실패했습니다.';
+                showUpdateError(errorMsg);
+                highlightErrorInput();
+            }
+        } catch (error) {
+            console.error(error);
+            showUpdateError('오류가 발생했습니다.');
+            highlightErrorInput();
+        }
+    });
+
+    function showUpdateError(message) {
+        const errorMsg = document.getElementById('updateErrorMsg');
+        errorMsg.textContent = message;
+        errorMsg.classList.remove('hidden');
+    }
+
+    function hideUpdateError() {
+        const errorMsg = document.getElementById('updateErrorMsg');
+        errorMsg.classList.add('hidden');
+    }
+
+    function highlightErrorInput() {
+        const nicknameInput = document.getElementById('updateNickname');
+        const emojiBtn = document.getElementById('updateEmojiTriggerBtn');
+        nicknameInput.classList.add('border-red-500');
+        emojiBtn.classList.add('border-red-500');
+        setTimeout(() => {
+            nicknameInput.classList.remove('border-red-500');
+            emojiBtn.classList.remove('border-red-500');
+        }, 2000);
+    }
+</script>
+
+<script>
+    // Modal Open/Close Functions
+    function openProfileUpdateModal() {
+        const modal = document.getElementById('profileUpdateModal');
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        hideUpdateError();
+    }
+
+    function closeProfileUpdateModal() {
+        const modal = document.getElementById('profileUpdateModal');
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+        hideUpdateError();
+    }
+
+    function openUpdateSuccessModal() {
+        const modal = document.getElementById('updateSuccessModal');
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function hideUpdateError() {
+        const errorMsg = document.getElementById('updateErrorMsg');
+        if (errorMsg) {
+            errorMsg.classList.add('hidden');
+        }
+    }
+</script>
 
 </body>
 </html>

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional(readOnly = true)
 class MemberService(
     private val memberRepository: MemberRepository,
     private val passwordEncoder: PasswordEncoder
@@ -51,5 +50,31 @@ class MemberService(
         member: Member,
     ) {
 
+    }
+
+    @Transactional
+    fun updateProfile(email: String, request: MemberDto.UpdateRequest) {
+        // 1. 왕관 이모지 검증
+        val member = memberRepository.findByEmail(email)
+            ?: throw BusinessException(ErrorCode.MEMBER_NOT_FOUND)
+
+        validateCrownEmoji(request.myEmoji)
+
+        // 2. 닉네임 중복 검사 (본인 제외)
+        memberRepository.findByNickname(request.nickname)?.let { existingMember ->
+            if (existingMember.id != member.id) {
+                throw BusinessException(ErrorCode.NICKNAME_ALREADY_EXISTS)
+            }
+        }
+
+        // 3. 이모지 중복 검사 (본인 제외)
+        memberRepository.findByMyEmoji(request.myEmoji)?.let { existingMember ->
+            if (existingMember.id != member.id) {
+                throw BusinessException(ErrorCode.EMOJI_ALREADY_EXISTS)
+            }
+        }
+
+        // 4. 프로필 업데이트 (Dirty Checking)
+        member.update(request.nickname, request.myEmoji)
     }
 }

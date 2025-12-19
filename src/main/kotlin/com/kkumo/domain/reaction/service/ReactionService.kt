@@ -20,10 +20,11 @@ class ReactionService(
 ) {
 
     /**
-     * 리액션 일괄 저장 (배치 처리)
+     * 리액션 일괄 저장 (배치 처리 - Toggle 방식)
      * 화면 이탈 시 클라이언트가 모아둔 리액션들을 한 번에 저장
+     * 기존 리액션이 있으면 isActive 토글, 없으면 새로 생성
      *
-     * @param member 인증된 사용자
+     * @param userDetails 인증된 사용자
      * @param request 배치 리액션 요청
      */
     @Transactional
@@ -35,25 +36,44 @@ class ReactionService(
             return
         }
 
-        // Post ID 목록 추출
+        // 1. Post ID 목록 추출
         val postIds = request.reactions.map { it.postId }.distinct()
 
-        // 모든 게시글 조회 (존재 여부 검증)
+        // 2. 모든 게시글 조회 (존재 여부 검증)
         val posts = postRepository.findAllById(postIds)
         val postMap = posts.associateBy { it.id }
 
-        // 유효한 리액션만 필터링하여 저장
-        val reactions = request.reactions.mapNotNull { req ->
-            val post = postMap[req.postId] ?: return@mapNotNull null
-
-            Reaction(
-                post = post,
-                member = member,
-                emojiType = req.reactionType
-            )
+        // 3. 기존 리액션 조회 및 Map으로 변환 (postId + emojiType을 키로 사용)
+        val existingReactions = reactionRepository.findAllByMemberAndPostIdIn(member, postIds)
+        val existingReactionMap = existingReactions.associateBy {
+            "${it.post.id}_${it.emojiType}"
         }
 
-        // 일괄 저장
-        reactionRepository.saveAll(reactions)
+        // 4. 토글 로직 수행
+        val reactionsToSave = mutableListOf<Reaction>()
+
+        request.reactions.forEach { req ->
+            val post = postMap[req.postId] ?: return@forEach
+            val key = "${req.postId}_${req.reactionType}"
+            val existingReaction = existingReactionMap[key]
+
+            if (existingReaction != null) {
+                // Case A: 기존 리액션 존재 -> isActive 반전 (Toggle)
+                existingReaction.isActive = !existingReaction.isActive
+                reactionsToSave.add(existingReaction)
+            } else {
+                // Case B: 기존 리액션 없음 -> 새로 생성 (isActive = true)
+                val newReaction = Reaction(
+                    post = post,
+                    member = member,
+                    emojiType = req.reactionType,
+                    isActive = true
+                )
+                reactionsToSave.add(newReaction)
+            }
+        }
+
+        // 5. 일괄 저장
+        reactionRepository.saveAll(reactionsToSave)
     }
 }

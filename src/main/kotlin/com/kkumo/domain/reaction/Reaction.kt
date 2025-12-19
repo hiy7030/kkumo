@@ -6,7 +6,15 @@ import com.kkumo.global.common.BaseTimeEntity
 import jakarta.persistence.*
 
 @Entity
-@Table(name = "reactions")
+@Table(
+    name = "reactions",
+    uniqueConstraints = [
+        UniqueConstraint(
+            name = "uk_reaction_member_post_emoji",
+            columnNames = ["member_id", "post_id", "emoji_type"]
+        )
+    ]
+)
 class Reaction(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,5 +31,8 @@ class Reaction(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "emoji_type", nullable = false)
-    var emojiType: ReactionType
+    var emojiType: ReactionType,
+
+    @Column(name = "is_active", nullable = false)
+    var isActive: Boolean = true
 ) : BaseTimeEntity()

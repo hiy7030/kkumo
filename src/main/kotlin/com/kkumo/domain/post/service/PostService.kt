@@ -24,7 +24,8 @@ class PostService(
     private val postRepository: PostRepository,
     private val memberRepository: MemberRepository,
     private val imageService: ImageService,
-    private val reactionRepository: ReactionRepository
+    private val reactionRepository: ReactionRepository,
+    private val kkumoProperties: com.kkumo.global.config.KkumoProperties,
 ) {
 
     /**
@@ -120,21 +121,27 @@ class PostService(
         // 3. 모든 게시글의 최근 반응자 조회
         val reactionReactors = reactionRepository.findRecentReactorsByPosts(posts)
 
-        // 4. Post ID별로 ReactionType -> Count 맵 생성
+        // 4. 현재 사용자가 남긴 활성화된 리액션 조회
+        val myActiveReactions = reactionRepository.findAllByMemberAndPostInAndIsActiveTrue(user, posts)
+        val myReactionMap = myActiveReactions
+            .groupBy { it.post.id to it.emojiType }
+            .mapValues { true }
+
+        // 5. Post ID별로 ReactionType -> Count 맵 생성
         val reactionCountMap = reactionCounts
             .groupBy { it.getPostId() }
             .mapValues { (_, projections) ->
                 projections.associate { it.getReactionType() to it.getCount().toInt() }
             }
 
-        // 5. Post ID별, ReactionType별로 최근 반응자 리스트 생성 (최대 3명)
+        // 6. Post ID별, ReactionType별로 최근 반응자 리스트 생성 (최대 3명)
         val reactionReactorMap = reactionReactors
             .groupBy { it.getPostId() to it.getReactionType() }
             .mapValues { (_, projections) ->
                 projections.take(3).map { it.getReactorNickname() }
             }
 
-        // 6. Post 엔티티를 FeedResponse로 변환
+        // 7. Post 엔티티를 FeedResponse로 변환
         val dailyPosts = posts.map { post ->
             val postId = post.id ?: 0L
             val postCountMap = reactionCountMap[postId] ?: emptyMap()
@@ -143,7 +150,8 @@ class PostService(
             val allReactions = ReactionType.entries.associateWith { type ->
                 val count = postCountMap[type] ?: 0
                 val reactors = reactionReactorMap[postId to type] ?: emptyList()
-                HomeResponse.ReactionInfo(count, reactors)
+                val isMeReacted = myReactionMap[postId to type] ?: false
+                HomeResponse.ReactionInfo(count, reactors, isMeReacted)
             }
 
             HomeResponse.FeedResponse.from(post, allReactions)
@@ -165,7 +173,7 @@ class PostService(
 
     /**
      * 내 기록 조회 (마이페이지용)
-     * - 로그인한 사용자의 모든 게시글
+     * - 로그인한 사용자의 Base Date 이후 게시글
      * - 실제 Reaction 개수 집계
      * - 최신순 정렬
      *
@@ -173,9 +181,11 @@ class PostService(
      * @return FeedResponse 리스트
      */
     fun getMyFeedList(member: Member): List<HomeResponse.FeedResponse> {
-        // 1. 사용자의 모든 게시글 조회 (페이징 없이 전체)
-        val posts = postRepository.findAllByMemberOrderByCreatedAtDesc(
+        // 1. 사용자의 Base Date 이후 게시글 조회 (페이징 없이 전체)
+        val baseDate = kkumoProperties.baseDate
+        val posts = postRepository.findAllByMemberAndPostedDateGreaterThanEqualOrderByCreatedAtDesc(
             member,
+            baseDate,
             Pageable.unpaged()
         ).content
 
@@ -185,21 +195,27 @@ class PostService(
         // 3. 모든 게시글의 최근 반응자 조회
         val reactionReactors = reactionRepository.findRecentReactorsByPosts(posts)
 
-        // 4. Post ID별로 ReactionType -> Count 맵 생성
+        // 4. 현재 사용자가 남긴 활성화된 리액션 조회
+        val myActiveReactions = reactionRepository.findAllByMemberAndPostInAndIsActiveTrue(member, posts)
+        val myReactionMap = myActiveReactions
+            .groupBy { it.post.id to it.emojiType }
+            .mapValues { true }
+
+        // 5. Post ID별로 ReactionType -> Count 맵 생성
         val reactionCountMap = reactionCounts
             .groupBy { it.getPostId() }
             .mapValues { (_, projections) ->
                 projections.associate { it.getReactionType() to it.getCount().toInt() }
             }
 
-        // 5. Post ID별, ReactionType별로 최근 반응자 리스트 생성 (최대 3명)
+        // 6. Post ID별, ReactionType별로 최근 반응자 리스트 생성 (최대 3명)
         val reactionReactorMap = reactionReactors
             .groupBy { it.getPostId() to it.getReactionType() }
             .mapValues { (_, projections) ->
                 projections.take(3).map { it.getReactorNickname() }
             }
 
-        // 6. Post 엔티티를 FeedResponse로 변환
+        // 7. Post 엔티티를 FeedResponse로 변환
         return posts.map { post ->
             val postId = post.id ?: 0L
             val postCountMap = reactionCountMap[postId] ?: emptyMap()
@@ -208,7 +224,8 @@ class PostService(
             val allReactions = ReactionType.entries.associateWith { type ->
                 val count = postCountMap[type] ?: 0
                 val reactors = reactionReactorMap[postId to type] ?: emptyList()
-                HomeResponse.ReactionInfo(count, reactors)
+                val isMeReacted = myReactionMap[postId to type] ?: false
+                HomeResponse.ReactionInfo(count, reactors, isMeReacted)
             }
 
             HomeResponse.FeedResponse.from(post, allReactions)

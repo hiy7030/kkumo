@@ -33,6 +33,7 @@ class MemberViewController(
             return "redirect:/login"
         }
 
+        // DB에서 최신 Member 정보를 조회하여 hasPostedToday가 정확히 반영되도록 함
         val member = memberRepository.findByEmail(userDetails.username)
             ?: return "redirect:/login"
 

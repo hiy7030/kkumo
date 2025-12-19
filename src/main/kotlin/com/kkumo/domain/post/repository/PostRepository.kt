@@ -17,6 +17,13 @@ interface PostRepository : JpaRepository<Post, Long> {
     // 내 기록 조회 (페이징, 최신순)
     fun findAllByMemberOrderByCreatedAtDesc(member: Member, pageable: Pageable): Page<Post>
 
+    // 내 기록 조회 (Base Date 이후, 페이징, 최신순)
+    fun findAllByMemberAndPostedDateGreaterThanEqualOrderByCreatedAtDesc(
+        member: Member,
+        postedDate: LocalDate,
+        pageable: Pageable
+    ): Page<Post>
+
     // 특정 사용자의 특정 기간 게시글 조회 (캘린더용)
     fun findAllByMemberAndPostedDateBetween(member: Member, startDate: LocalDate, endDate: LocalDate): List<Post>
 

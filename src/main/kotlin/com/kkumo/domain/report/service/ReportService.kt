@@ -13,7 +13,8 @@ import java.util.*
 @Service
 class ReportService(
     private val memberRepository: MemberRepository,
-    private val postRepository: PostRepository
+    private val postRepository: PostRepository,
+    private val kkumoProperties: com.kkumo.global.config.KkumoProperties,
 ) {
 
     /**
@@ -24,8 +25,12 @@ class ReportService(
      */
     fun generateDailySummaries(year: Int, month: Int): List<DailySummaryDto> {
         val targetYearMonth = YearMonth.of(year, month)
-        val startDate = targetYearMonth.atDay(1)
+        val initialStartDate = targetYearMonth.atDay(1)
         val endDate = targetYearMonth.atEndOfMonth()
+
+        // Base Date Clamping: startDate가 baseDate보다 이전이면 baseDate로 대체
+        val baseDate = kkumoProperties.baseDate
+        val startDate = if (initialStartDate.isBefore(baseDate)) baseDate else initialStartDate
 
         // 현재 월인 경우 오늘까지만, 과거 월인 경우 마지막 날까지
         val currentYearMonth = YearMonth.now()
@@ -39,7 +44,7 @@ class ReportService(
         val allMembers = memberRepository.findAll().sortedBy { it.nickname }
         val totalMemberCount = allMembers.size
 
-        // 2. 해당 기간의 모든 게시글 조회
+        // 2. 해당 기간의 모든 게시글 조회 (Base Date 이후 데이터만)
         val posts = postRepository.findAllByPostedDateBetween(startDate, limitDate)
 
         // 3. 날짜별 작성 멤버 맵 구성

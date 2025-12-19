@@ -54,10 +54,12 @@ object HomeResponse {
      * 리액션 상세 정보
      * @param count 리액션 총 개수
      * @param recentReactors 최근 반응한 사용자 닉네임 리스트 (최대 3명, 최신순)
+     * @param isMeReacted 현재 로그인한 사용자가 이 리액션을 눌렀는지 여부
      */
     data class ReactionInfo(
         val count: Int,
-        val recentReactors: List<String> = emptyList()
+        val recentReactors: List<String> = emptyList(),
+        val isMeReacted: Boolean = false
     )
 
     data class MemberResponse(
