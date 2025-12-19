@@ -66,9 +66,10 @@ class SecurityConfig(
             rememberMe {
                 key = "kkumo-remember-me-secret-key-2024"
                 tokenRepository = persistentTokenRepository()
-                userDetailsService = this@SecurityConfig.userDetailsService
+                userDetailsService = userDetailsService
                 tokenValiditySeconds = 1209600 // 14일 (2주)
                 rememberMeParameter = "remember-me"
+                alwaysRemember = false
             }
 
             // 세션 관리 (기본값: IF_REQUIRED)
