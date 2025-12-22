@@ -35,4 +35,12 @@ class MemberApiController(
         memberService.updateProfile(email, request)
         return ResponseEntity.ok(ApiResponse.success(Unit))
     }
+
+    @PostMapping("/members/reset-password")
+    fun resetPassword(
+        @Valid @RequestBody request: MemberDto.PasswordResetRequest
+    ): ResponseEntity<ApiResponse<Unit>> {
+        memberService.resetPassword(request)
+        return ResponseEntity.ok(ApiResponse.success(Unit))
+    }
 }

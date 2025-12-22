@@ -12,7 +12,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class MemberService(
     private val memberRepository: MemberRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val mailService: MailService
 ) {
 
     @Transactional
@@ -76,5 +77,22 @@ class MemberService(
 
         // 4. 프로필 업데이트 (Dirty Checking)
         member.update(request.nickname, request.myEmoji)
+    }
+
+    @Transactional
+    fun resetPassword(request: MemberDto.PasswordResetRequest) {
+        // 1. 이메일로 회원 조회
+        val member = memberRepository.findByEmail(request.email)
+            ?: throw BusinessException(ErrorCode.MEMBER_NOT_FOUND)
+
+        // 2. 인증번호 검증 (삭제하지 않음)
+        mailService.validateCodeOnly(request.email, request.code)
+
+        // 3. 비밀번호 암호화 및 업데이트
+        val encodedPassword = passwordEncoder.encode(request.newPassword)
+        member.updatePassword(encodedPassword)
+
+        // 4. 사용된 인증코드 삭제
+        mailService.removeCode(request.email)
     }
 }

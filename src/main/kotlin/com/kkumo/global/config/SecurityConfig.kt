@@ -81,6 +81,8 @@ class SecurityConfig(
                 authorize("/login", permitAll)
                 authorize("/kkumo/v1/signup", permitAll)
                 authorize("/kkumo/v1/members", permitAll)
+                authorize("/kkumo/v1/forgot-password", permitAll)
+                authorize("/kkumo/v1/members/reset-password", permitAll)
 
                 // 이메일 인증 허용 (회원가입 시 필요)
                 authorize("/kkumo/v1/mail/**", permitAll)

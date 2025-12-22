@@ -33,4 +33,14 @@ class MailController(
             ApiResponse.success(MailDto.MailResponse("이메일 인증이 완료되었습니다."))
         )
     }
+
+    @PostMapping("/mail/validate")
+    fun validateCode(
+        @Valid @RequestBody request: MailDto.VerifyRequest
+    ): ResponseEntity<ApiResponse<MailDto.MailResponse>> {
+        mailService.validateCodeOnly(request.email, request.code)
+        return ResponseEntity.ok(
+            ApiResponse.success(MailDto.MailResponse("인증번호가 확인되었습니다."))
+        )
+    }
 }

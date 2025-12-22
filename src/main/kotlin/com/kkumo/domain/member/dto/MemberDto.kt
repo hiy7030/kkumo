@@ -59,4 +59,18 @@ object MemberDto {
         @field:NotBlank(message = "이모지를 선택해주세요.")
         val myEmoji: String
     )
+
+    data class PasswordResetRequest(
+        @field:NotBlank(message = "이메일은 필수입니다.")
+        @field:Email(message = "올바른 이메일 형식이 아닙니다.")
+        val email: String,
+
+        @field:NotBlank(message = "인증번호는 필수입니다.")
+        @field:Size(min = 6, max = 6, message = "인증번호는 6자리여야 합니다.")
+        val code: String,
+
+        @field:NotBlank(message = "새 비밀번호는 필수입니다.")
+        @field:Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다.")
+        val newPassword: String
+    )
 }

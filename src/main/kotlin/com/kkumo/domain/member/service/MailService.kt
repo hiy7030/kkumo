@@ -53,6 +53,34 @@ class MailService(
         return true
     }
 
+    /**
+     * 인증번호 검증만 수행 (삭제하지 않음)
+     * 비밀번호 재설정 플로우에서 사용
+     */
+    fun validateCodeOnly(email: String, code: String): Boolean {
+        val info = verificationStorage[email]
+            ?: throw BusinessException(ErrorCode.VERIFICATION_CODE_NOT_FOUND)
+
+        if (LocalDateTime.now().isAfter(info.expiresAt)) {
+            verificationStorage.remove(email)
+            throw BusinessException(ErrorCode.VERIFICATION_CODE_EXPIRED)
+        }
+
+        if (info.code != code) {
+            throw BusinessException(ErrorCode.VERIFICATION_CODE_MISMATCH)
+        }
+
+        return true
+    }
+
+    /**
+     * 인증번호 삭제
+     * 비밀번호 재설정 완료 후 호출
+     */
+    fun removeCode(email: String) {
+        verificationStorage.remove(email)
+    }
+
     private fun generateVerificationCode(): String {
         return String.format("%06d", Random.nextInt(0, 1000000))
     }

@@ -72,4 +72,14 @@ class Member(
         this.nickname = nickname
         this.myEmoji = myEmoji
     }
+
+    /**
+     * 비밀번호 업데이트
+     * JPA Dirty Checking을 통해 자동으로 DB에 반영됨
+     *
+     * @param encodedPassword 암호화된 새 비밀번호
+     */
+    fun updatePassword(encodedPassword: String) {
+        this.password = encodedPassword
+    }
 }

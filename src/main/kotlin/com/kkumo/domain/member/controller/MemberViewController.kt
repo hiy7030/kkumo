@@ -59,4 +59,9 @@ class LoginViewController {
     fun loginPage(): String {
         return "login"
     }
+
+    @GetMapping("/kkumo/v1/forgot-password")
+    fun forgotPasswordPage(): String {
+        return "forgot-password"
+    }
 }
