@@ -11,7 +11,7 @@
 </head>
 <body class="bg-white min-h-screen pb-24">
 
-<div th:replace="~{fragments/layout :: header(${hasPostedToday ? '👑' : '🐢'})}"></div>
+<div th:replace="~{fragments/layout :: header(${hasCrown ? '👑' : '🐢'})}"></div>
 
 <main class="max-w-3xl mx-auto px-4 py-6 space-y-8">
 
@@ -68,8 +68,15 @@
         <h2 class="text-xl font-bold text-gray-800 mb-4">내 기록</h2>
 
         <div th:if="${myFeedList != null && !myFeedList.isEmpty()}" class="space-y-4">
-            <div th:each="item : ${myFeedList}">
+            <div th:each="item : ${myFeedList}" class="mb-4">
                 <div th:replace="~{fragments/feed :: feedItem(${item}, 'absolute', false)}"></div>
+
+                <!-- Private Post Badge -->
+                <div th:if="${item.isPrivate}"
+                     class="px-4 mt-2 flex items-center space-x-1 text-xs text-[#8294C4]">
+                    <span>🔒</span>
+                    <span class="font-semibold">비공개 기록</span>
+                </div>
             </div>
         </div>
 

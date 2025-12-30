@@ -6,7 +6,24 @@
     <title>새 기록 - KKUMO</title>
     <meta th:replace="~{fragments/layout :: viewTransitionMeta}" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2/dist/browser-image-compression.js"></script>
     <style th:replace="~{fragments/layout :: fadeInAnimation}"></style>
+    <style>
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -45%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .modal-content {
+            animation: fadeInUp 0.3s ease-out;
+        }
+    </style>
 </head>
 <body class="bg-white min-h-screen">
 
@@ -82,12 +99,14 @@
 <div class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-[#DBDFEA] z-40">
     <div class="max-w-3xl mx-auto px-4 py-3">
         <div class="flex items-center space-x-4">
-            <!-- Image Upload Button -->
+            <!-- Image Upload Button (Camera) -->
             <button
                     id="imageUploadBtn"
-                    class="text-[#8294C4] hover:bg-[#8294C4]/10 p-2 rounded-full transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    class="text-[#8294C4] hover:bg-[#8294C4]/10 p-2.5 rounded-full transition active:scale-95"
+                    aria-label="사진 촬영 또는 업로드">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 </svg>
             </button>
 
@@ -107,6 +126,43 @@
             </div>
         </div>
     </div>
+
+    <!-- Private Post Toggle -->
+    <div class="flex items-center justify-between px-4 py-3 border-t border-[#DBDFEA]">
+        <label for="privateToggle" class="flex items-center space-x-3 cursor-pointer group">
+            <input
+                    type="checkbox"
+                    id="privateToggle"
+                    class="hidden peer">
+            <div class="w-5 h-5 border-2 border-[#DBDFEA] rounded-md flex items-center justify-center peer-checked:bg-[#8294C4] peer-checked:border-[#8294C4] transition group-hover:border-[#8294C4]">
+                <svg class="w-3 h-3 text-white hidden peer-checked:block" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-sm font-semibold text-gray-800">🔒 나만 보기</span>
+                <span class="text-xs text-[#ACB1D6]">이 글은 홈에서 흐릿하게 보입니다</span>
+            </div>
+        </label>
+    </div>
+</div>
+
+<!-- Custom Alert Modal -->
+<div id="customAlertModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+    <!-- Modal Box -->
+    <div class="modal-content fixed top-1/2 left-1/2 w-11/12 max-w-md bg-white rounded-2xl shadow-lg border border-[#DBDFEA] p-8" style="transform: translate(-50%, -50%);">
+        <!-- Message -->
+        <p id="alertMessage" class="text-slate-800 font-medium text-lg text-center mb-6">
+            메시지가 표시됩니다.
+        </p>
+
+        <!-- Confirm Button -->
+        <button
+            id="alertConfirmBtn"
+            class="w-full rounded-full bg-[#8294C4] text-white font-bold py-3 px-6 hover:bg-[#6E80B0] active:scale-95 transition duration-200 focus:outline-none focus:ring-2 focus:ring-[#ACB1D6] focus:ring-offset-2">
+            확인
+        </button>
+    </div>
 </div>
 
 <!-- JavaScript -->
@@ -123,6 +179,30 @@
     const submitBtn = document.getElementById('submitBtn');
 
     let selectedFile = null;
+
+    // ==================== Custom Alert Modal ====================
+    const customAlertModal = document.getElementById('customAlertModal');
+    const alertMessage = document.getElementById('alertMessage');
+    const alertConfirmBtn = document.getElementById('alertConfirmBtn');
+
+    function showAlert(message) {
+        alertMessage.textContent = message;
+        customAlertModal.classList.remove('hidden');
+        alertConfirmBtn.focus();
+    }
+
+    function hideAlert() {
+        customAlertModal.classList.add('hidden');
+    }
+
+    alertConfirmBtn.addEventListener('click', hideAlert);
+
+    // Enter key handler for modal
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' && !customAlertModal.classList.contains('hidden')) {
+            hideAlert();
+        }
+    });
 
     // ==================== Auto Resize Textarea ====================
     contentInput.addEventListener('input', function() {
@@ -155,13 +235,13 @@
 
         // 파일 타입 체크
         if (!file.type.startsWith('image/')) {
-            alert('이미지 파일만 선택할 수 있습니다.');
+            showAlert('이미지 파일만 선택할 수 있습니다.');
             return;
         }
 
-        // 파일 크기 체크 (10MB 제한)
-        if (file.size > 10 * 1024 * 1024) {
-            alert('이미지 파일 크기는 10MB를 초과할 수 없습니다.');
+        // 파일 크기 체크 (30MB 제한 - 압축 전 원본 파일)
+        if (file.size > 30 * 1024 * 1024) {
+            showAlert('이미지 파일 크기는 30MB를 초과할 수 없습니다.');
             return;
         }
 
@@ -196,24 +276,43 @@
     submitBtn.addEventListener('click', async function() {
         // 이미지 필수 체크
         if (!selectedFile) {
-            alert('사진은 필수입니다. 사진을 선택해주세요.');
+            showAlert('사진은 필수입니다. 사진을 선택해주세요.');
             return;
         }
 
         // 버튼 비활성화 (중복 제출 방지)
         submitBtn.disabled = true;
-        submitBtn.textContent = '기록 중...';
-
-        // FormData 생성
-        const formData = new FormData();
-        formData.append('image', selectedFile);
-
-        const content = contentInput.value.trim();
-        if (content) {
-            formData.append('content', content);
-        }
+        submitBtn.textContent = '이미지 압축 중...';
 
         try {
+            // ==================== 이미지 압축 ====================
+            const options = {
+                maxSizeMB: 1,                    // 최대 1MB
+                maxWidthOrHeight: 1920,          // FHD 해상도 제한
+                useWebWorker: true               // 메인 스레드 멈춤 방지
+            };
+
+            const compressedFile = await imageCompression(selectedFile, options);
+
+            console.log('원본 파일 크기:', (selectedFile.size / 1024 / 1024).toFixed(2), 'MB');
+            console.log('압축 파일 크기:', (compressedFile.size / 1024 / 1024).toFixed(2), 'MB');
+
+            // ==================== 업로드 시작 ====================
+            submitBtn.textContent = '업로드 중...';
+
+            // FormData 생성
+            const formData = new FormData();
+            formData.append('image', compressedFile);
+
+            const content = contentInput.value.trim();
+            if (content) {
+                formData.append('content', content);
+            }
+
+            // Get private toggle value
+            const isPrivate = document.getElementById('privateToggle').checked;
+            formData.append('isPrivate', isPrivate.toString());
+
             const response = await fetch('/kkumo/v1/posts', {
                 method: 'POST',
                 body: formData
@@ -226,13 +325,13 @@
                 location.href = '/kkumo/v1/home';
             } else {
                 // 실패 시 (예: 1일 1회 제한)
-                alert(result.message || '기록에 실패했습니다.');
+                showAlert(result.message || '기록에 실패했습니다.');
                 submitBtn.disabled = false;
                 submitBtn.textContent = '기록하기';
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('기록 중 오류가 발생했습니다. 다시 시도해주세요.');
+            showAlert('이미지 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
             submitBtn.disabled = false;
             submitBtn.textContent = '기록하기';
         }

@@ -15,11 +15,12 @@
 <div th:fragment="feedItem(item, dateStyle, interactive)" class="bg-white rounded-xl shadow-sm overflow-hidden border border-[#DBDFEA]">
     <div class="px-4 pt-4 pb-3 flex items-center justify-between">
         <div class="flex items-center space-x-2 relative">
-            <div class="relative">
-                <div class="w-10 h-10 rounded-full bg-[#FDF4E3] border border-[#DBDFEA] flex items-center justify-center">
-                    <span class="text-2xl" th:text="${item.writerEmoji}">😊</span>
-                </div>
-                <span th:if="${item.hasCrown}" class="absolute -top-4 -left-1 text-xl transform rotate-[-15deg] drop-shadow-sm">👑</span>
+            <div class="relative w-10 h-10 rounded-full bg-[#FDF4E3] border border-[#DBDFEA] flex items-center justify-center">
+
+                <span class="text-2xl" th:text="${item.writerEmoji}">😊</span>
+
+                <span th:if="${item.hasCrown}"
+                      class="absolute -top-4 -left-2 text-xl transform rotate-[-25deg] drop-shadow-sm">👑</span>
             </div>
             <span class="font-bold text-gray-800" th:text="${item.nickname}">닉네임</span>
         </div>
@@ -36,13 +37,30 @@
 
     <div class="px-4">
         <div class="w-full aspect-square bg-gray-50 rounded-2xl border border-[#DBDFEA] overflow-hidden flex items-center justify-center relative">
-            <img
+            <!-- Clickable Image (public post or my-page) -->
+            <img th:if="${!(item.isPrivate && interactive)}"
                     th:src="${item.thumbnailUrl}"
                     th:data-original-url="${item.originalImageUrl}"
                     onclick="openImageViewer(this.getAttribute('data-original-url'))"
                     alt="Feed Image"
                     class="w-full h-full object-contain cursor-pointer hover:opacity-90 transition"
             />
+
+            <!-- Non-clickable Blurred Image (private post in home feed) -->
+            <img th:if="${item.isPrivate && interactive}"
+                    th:src="${item.thumbnailUrl}"
+                    alt="Feed Image"
+                    class="w-full h-full object-contain cursor-default blur-lg"
+            />
+
+            <!-- Private Post Overlay (only in home feed) -->
+            <div th:if="${item.isPrivate && interactive}"
+                 class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="text-center">
+                    <span class="text-5xl mb-2 block">🔒</span>
+                    <span class="text-white font-semibold text-sm bg-black/40 px-3 py-1 rounded-full">비공개</span>
+                </div>
+            </div>
         </div>
     </div>
 

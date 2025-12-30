@@ -98,6 +98,7 @@ class ReportController(
         model.addAttribute("hasPostedToday", hasPostedToday)
         model.addAttribute("isCurrentMonth", isCurrentMonth)
         model.addAttribute("isPrevMonthAllowed", isPrevMonthAllowed)
+        model.addAttribute("hasCrown", member.hasCrown)
 
         return "my-report"
     }
@@ -150,6 +151,7 @@ class ReportController(
         model.addAttribute("isCurrentMonth", isCurrentMonth)
         model.addAttribute("hasPostedToday", hasPostedToday)
         model.addAttribute("isPrevMonthAllowed", isPrevMonthAllowed)
+        model.addAttribute("hasCrown", member.hasCrown)
 
         return "all-report"
     }

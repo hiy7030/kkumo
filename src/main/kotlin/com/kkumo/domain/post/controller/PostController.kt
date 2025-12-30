@@ -40,12 +40,13 @@ class PostController(
     fun createPost(
         @AuthenticationPrincipal user: CustomUserDetails,
         @RequestPart("image") imageFile: MultipartFile,
-        @RequestParam("content", required = false) content: String?
+        @RequestParam("content", required = false) content: String?,
+        @RequestParam("isPrivate", required = false, defaultValue = "false") isPrivate: Boolean
     ): PostDto.CreateResponse {
         // CustomUserDetails에서 Member 엔티티 직접 접근
         val member = user.member
 
-        return postService.createPost(member, content, imageFile)
+        return postService.createPost(member, content, imageFile, isPrivate)
     }
 
     /**

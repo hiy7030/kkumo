@@ -26,7 +26,8 @@ object HomeResponse {
         val originalImageUrl: String,  // 상세 조회용 원본 이미지 URL
         val comment: String,
         val createdAt: LocalDateTime,  // 작성 시간
-        val reactions: Map<ReactionType, ReactionInfo>  // ReactionType Enum -> 리액션 정보
+        val reactions: Map<ReactionType, ReactionInfo>,  // ReactionType Enum -> 리액션 정보
+        val isPrivate: Boolean  // 비공개 여부
     ) {
         companion object {
             /**
@@ -44,7 +45,8 @@ object HomeResponse {
                     originalImageUrl = post.originalImageUrl,
                     comment = post.content ?: "",
                     createdAt = post.createdAt,
-                    reactions = reactions
+                    reactions = reactions,
+                    isPrivate = post.isPrivate
                 )
             }
         }

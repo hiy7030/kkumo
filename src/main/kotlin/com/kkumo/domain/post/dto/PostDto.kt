@@ -41,7 +41,8 @@ object PostDto {
         val originalImageUrl: String,
         val content: String?,
         val postedDate: LocalDate,
-        val createdAt: LocalDateTime
+        val createdAt: LocalDateTime,
+        val isPrivate: Boolean
     ) {
         companion object {
             fun from(post: Post): Response {
@@ -54,7 +55,8 @@ object PostDto {
                     originalImageUrl = post.originalImageUrl,
                     content = post.content,
                     postedDate = post.postedDate,
-                    createdAt = post.createdAt
+                    createdAt = post.createdAt,
+                    isPrivate = post.isPrivate
                 )
             }
         }

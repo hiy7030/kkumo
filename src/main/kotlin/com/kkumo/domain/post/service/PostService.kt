@@ -39,7 +39,8 @@ class PostService(
     fun createPost(
         member: Member,
         content: String?,
-        imageFile: MultipartFile
+        imageFile: MultipartFile,
+        isPrivate: Boolean = false
     ): PostDto.CreateResponse {
         val today = LocalDate.now()
 
@@ -57,7 +58,8 @@ class PostService(
             content = content?.take(140), // 최대 140자 제한
             thumbnailUrl = uploadResult.thumbnailUrl,
             originalImageUrl = uploadResult.originalImageUrl,
-            postedDate = today  // 서버 기준 날짜 사용
+            postedDate = today,  // 서버 기준 날짜 사용
+            isPrivate = isPrivate
         )
 
         val savedPost = postRepository.save(post)

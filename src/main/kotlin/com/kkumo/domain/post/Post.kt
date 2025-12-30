@@ -35,5 +35,8 @@ class Post(
     var originalImageUrl: String,
 
     @Column(name = "posted_date", nullable = false)
-    val postedDate: LocalDate
+    val postedDate: LocalDate,
+
+    @Column(name = "is_private", nullable = false)
+    var isPrivate: Boolean = false
 ) : BaseTimeEntity()
