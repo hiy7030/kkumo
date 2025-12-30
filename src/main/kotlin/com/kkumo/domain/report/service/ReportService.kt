@@ -25,60 +25,64 @@ class ReportService(
      */
     fun generateDailySummaries(year: Int, month: Int): List<DailySummaryDto> {
         val targetYearMonth = YearMonth.of(year, month)
-        val initialStartDate = targetYearMonth.atDay(1)
-        val endDate = targetYearMonth.atEndOfMonth()
+        val today = LocalDate.now()
 
-        // Base Date Clamping: startDate가 baseDate보다 이전이면 baseDate로 대체
+        // 1. 조회 범위 계산 (기존 로직 유지)
         val baseDate = kkumoProperties.baseDate
+        val initialStartDate = targetYearMonth.atDay(1)
+
+        // 시작일: 해당 월 1일과 서비스 시작일 중 늦은 날짜
         val startDate = if (initialStartDate.isBefore(baseDate)) baseDate else initialStartDate
 
-        // 현재 월인 경우 오늘까지만, 과거 월인 경우 마지막 날까지
-        val currentYearMonth = YearMonth.now()
-        val limitDate = if (targetYearMonth == currentYearMonth) {
-            LocalDate.now()
-        } else {
-            endDate
+        // 종료일: 해당 월 마지막 날과 오늘 중 이른 날짜 (미래 데이터 조회 방지)
+        val endDate = targetYearMonth.atEndOfMonth()
+        val limitDate = if (endDate.isAfter(today)) today else endDate
+
+        // 예외 처리: 시작일이 종료일보다 미래인 경우 (아직 오지 않은 달) -> 빈 리스트
+        if (startDate.isAfter(limitDate)) {
+            return emptyList()
         }
 
-        // 1. 모든 멤버 조회 (닉네임 기준 정렬)
+        // 2. 모든 멤버 조회 (기존 sortedBy 유지 - Repository 수정 없이 안전하게)
         val allMembers = memberRepository.findAll().sortedBy { it.nickname }
         val totalMemberCount = allMembers.size
 
-        // 2. 해당 기간의 모든 게시글 조회 (Base Date 이후 데이터만)
+        // 3. 해당 기간의 모든 게시글 조회
         val posts = postRepository.findAllByPostedDateBetween(startDate, limitDate)
 
-        // 3. 날짜별 작성 멤버 맵 구성
-        // Map<LocalDate, Set<MemberId>>
+        // 4. 날짜별 작성 멤버 ID 맵핑 (최적화)
+        // Map<LocalDate, Set<Long>> 형태로 변환하여 빠른 조회
         val dateToMemberIdsMap = posts.groupBy { it.postedDate }
-            .mapValues { entry -> entry.value.map { it.member.id }.toSet() }
+            .mapValues { (_, dayPosts) ->
+                dayPosts.mapNotNull { it.member.id }.toSet()
+            }
 
-        // 4. 일별 요약 생성 (최신 날짜순)
-        val summaries = (1..limitDate.dayOfMonth).reversed().map { day ->
+        // 5. 일별 요약 생성 (IntRange 활용)
+        val startDay = startDate.dayOfMonth
+        val endDay = limitDate.dayOfMonth
+
+        // startDay부터 endDay까지 역순으로 반복
+        return (startDay..endDay).reversed().map { day ->
             val currentDate = targetYearMonth.atDay(day)
             val postedMemberIds = dateToMemberIdsMap[currentDate] ?: emptySet()
 
-            // 기록한 멤버
-            val postedMembers = allMembers
-                .filter { it.id in postedMemberIds }
-                .map { MemberDto(nickname = it.nickname, emoji = it.myEmoji) }
-
-            // 기록 안 한 멤버
-            val notPostedMembers = allMembers
-                .filter { it.id !in postedMemberIds }
-                .map { MemberDto(nickname = it.nickname, emoji = it.myEmoji) }
-
-            // 요일 추출 (한글)
-            val dayOfWeek = currentDate.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREAN)
+            // [핵심 리팩토링] partition: filter를 두 번 돌지 않고, 한 번에 두 그룹으로 분리
+            val (postedMembersEntities, notPostedMembersEntities) = allMembers.partition {
+                it.id in postedMemberIds
+            }
 
             DailySummaryDto(
                 date = currentDate,
-                dayOfWeek = dayOfWeek,
+                dayOfWeek = currentDate.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREAN),
                 totalMemberCount = totalMemberCount,
-                postedMembers = postedMembers,
-                notPostedMembers = notPostedMembers
+                // Named Argument 복구 (순서 상관없이 안전하게)
+                postedMembers = postedMembersEntities.map {
+                    MemberDto(nickname = it.nickname, emoji = it.myEmoji)
+                },
+                notPostedMembers = notPostedMembersEntities.map {
+                    MemberDto(nickname = it.nickname, emoji = it.myEmoji)
+                }
             )
         }
-
-        return summaries
     }
 }

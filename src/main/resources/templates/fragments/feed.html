@@ -344,8 +344,37 @@
                 return;
             }
 
-            const payload = JSON.stringify({ reactions: reactionQueue });
-            console.log('Sending batch reactions:', reactionQueue);
+            // ==================== Queue Compression Logic ====================
+            // 같은 postId + reactionType의 클릭 횟수를 카운트
+            const reactionMap = new Map();
+
+            reactionQueue.forEach(reaction => {
+                const key = `${reaction.postId}_${reaction.reactionType}`;
+                reactionMap.set(key, (reactionMap.get(key) || 0) + 1);
+            });
+
+            // 홀수 클릭만 필터링 (짝수 = 원래 상태로 복귀 = 전송 불필요)
+            const finalReactions = [];
+            reactionMap.forEach((count, key) => {
+                if (count % 2 === 1) {  // 홀수 클릭만 전송
+                    const [postId, reactionType] = key.split('_');
+                    finalReactions.push({
+                        postId: parseInt(postId),
+                        reactionType: reactionType
+                    });
+                }
+            });
+
+            // 압축 후 전송할 데이터가 없으면 종료
+            if (finalReactions.length === 0) {
+                console.log('No final reactions to send after compression');
+                reactionQueue.length = 0;
+                return;
+            }
+
+            const payload = JSON.stringify({ reactions: finalReactions });
+            console.log('Original queue size:', reactionQueue.length);
+            console.log('Compressed reactions to send:', finalReactions);
 
             // 방법 1: Fetch API with keepalive (권장)
             fetch('/kkumo/v1/reactions/batch', {

@@ -5,6 +5,8 @@ import com.kkumo.domain.member.Member
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import java.time.LocalDate
 
 interface PostRepository : JpaRepository<Post, Long> {
@@ -13,6 +15,16 @@ interface PostRepository : JpaRepository<Post, Long> {
 
     // 오늘의 피드 조회 (최신순)
     fun findAllByPostedDateOrderByCreatedAtDesc(postedDate: LocalDate): List<Post>
+
+    // 오늘의 피드 조회 with Member JOIN FETCH (N+1 최적화)
+    @Query("""
+        SELECT p
+        FROM Post p
+        JOIN FETCH p.member m
+        WHERE p.postedDate = :postedDate
+        ORDER BY p.createdAt DESC
+    """)
+    fun findAllByPostedDateWithMember(@Param("postedDate") postedDate: LocalDate): List<Post>
 
     // 내 기록 조회 (페이징, 최신순)
     fun findAllByMemberOrderByCreatedAtDesc(member: Member, pageable: Pageable): Page<Post>

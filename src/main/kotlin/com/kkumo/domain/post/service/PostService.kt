@@ -65,9 +65,8 @@ class PostService(
         val savedPost = postRepository.save(post)
 
         // 4. Member 업데이트 (Streak & Crown)
-        // 영속 상태의 Member를 조회하여 Dirty Checking 활성화
-        val persistentMember = memberRepository.findById(member.id)
-            .orElseThrow { BusinessException(ErrorCode.MEMBER_NOT_FOUND) }
+        // getReferenceById를 사용하여 불필요한 SELECT 쿼리 제거 (프록시 객체 반환)
+        val persistentMember = memberRepository.getReferenceById(member.id)
 
         // 도메인 로직 호출 -> JPA Dirty Checking으로 자동 DB 반영
         persistentMember.succeedPost(today)
@@ -102,6 +101,7 @@ class PostService(
      * - 선택된 날짜에 작성된 모든 게시글
      * - 실제 Reaction 개수 집계
      * - 최신순 정렬
+     * - N+1 문제 방지를 위해 Member JOIN FETCH 적용
      *
      * @param date 조회할 날짜
      * @return FeedResponse 리스트
@@ -114,19 +114,20 @@ class PostService(
         val selectedDate = date?.let { LocalDate.parse(it) } ?: today
         val isToday = selectedDate == today
 
-        // 1. 해당 날짜의 게시글 조회
-        val posts = postRepository.findAllByPostedDateOrderByCreatedAtDesc(selectedDate)
+        // 1. 해당 날짜의 게시글 조회 (Member JOIN FETCH로 N+1 방지)
+        val posts = postRepository.findAllByPostedDateWithMember(selectedDate)
 
         // 2. 모든 게시글의 리액션 개수 집계
         val reactionCounts = reactionRepository.countByPostsGroupByType(posts)
 
-        // 3. 모든 게시글의 최근 반응자 조회
-        val reactionReactors = reactionRepository.findRecentReactorsByPosts(posts)
+        // 3. 모든 게시글의 최근 반응자 조회 (Window Function으로 DB 레벨에서 TOP 3 추출)
+        val postIds = posts.mapNotNull { it.id }
+        val reactionReactors = reactionRepository.findRecentReactorsByPosts(postIds)
 
-        // 4. 현재 사용자가 남긴 활성화된 리액션 조회
-        val myActiveReactions = reactionRepository.findAllByMemberAndPostInAndIsActiveTrue(user, posts)
+        // 4. 현재 사용자가 남긴 활성화된 리액션 조회 (N+1 방지: Projection 사용)
+        val myActiveReactions = reactionRepository.findMyActiveReactions(user.id, postIds)
         val myReactionMap = myActiveReactions
-            .groupBy { it.post.id to it.emojiType }
+            .groupBy { it.getPostId() to it.getEmojiType() }
             .mapValues { true }
 
         // 5. Post ID별로 ReactionType -> Count 맵 생성
@@ -194,13 +195,14 @@ class PostService(
         // 2. 모든 게시글의 리액션 개수 집계
         val reactionCounts = reactionRepository.countByPostsGroupByType(posts)
 
-        // 3. 모든 게시글의 최근 반응자 조회
-        val reactionReactors = reactionRepository.findRecentReactorsByPosts(posts)
+        // 3. 모든 게시글의 최근 반응자 조회 (Window Function으로 DB 레벨에서 TOP 3 추출)
+        val postIds = posts.mapNotNull { it.id }
+        val reactionReactors = reactionRepository.findRecentReactorsByPosts(postIds)
 
-        // 4. 현재 사용자가 남긴 활성화된 리액션 조회
-        val myActiveReactions = reactionRepository.findAllByMemberAndPostInAndIsActiveTrue(member, posts)
+        // 4. 현재 사용자가 남긴 활성화된 리액션 조회 (N+1 방지: Projection 사용)
+        val myActiveReactions = reactionRepository.findMyActiveReactions(member.id, postIds)
         val myReactionMap = myActiveReactions
-            .groupBy { it.post.id to it.emojiType }
+            .groupBy { it.getPostId() to it.getEmojiType() }
             .mapValues { true }
 
         // 5. Post ID별로 ReactionType -> Count 맵 생성

@@ -36,8 +36,12 @@ class ReactionService(
             return
         }
 
+        // 0. 안전장치: 중복 제거 (postId + reactionType 기준)
+        // 프론트에서 압축되었더라도, 혹시 모를 중복 요청에 대비
+        val uniqueReactions = request.reactions.distinctBy { Pair(it.postId, it.reactionType) }
+
         // 1. Post ID 목록 추출
-        val postIds = request.reactions.map { it.postId }.distinct()
+        val postIds = uniqueReactions.map { it.postId }.distinct()
 
         // 2. 모든 게시글 조회 (존재 여부 검증)
         val posts = postRepository.findAllById(postIds)
@@ -52,7 +56,7 @@ class ReactionService(
         // 4. 토글 로직 수행
         val reactionsToSave = mutableListOf<Reaction>()
 
-        request.reactions.forEach { req ->
+        uniqueReactions.forEach { req ->
             val post = postMap[req.postId] ?: return@forEach
             val key = "${req.postId}_${req.reactionType}"
             val existingReaction = existingReactionMap[key]
