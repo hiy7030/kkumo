@@ -4,6 +4,7 @@ import com.kkumo.domain.post.Post
 import com.kkumo.domain.member.Member
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Slice
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -35,6 +36,13 @@ interface PostRepository : JpaRepository<Post, Long> {
         postedDate: LocalDate,
         pageable: Pageable
     ): Page<Post>
+
+    // 내 기록 조회 (Base Date 이후, Slice, 최신순) - 무한 스크롤용
+    fun findSliceByMemberAndPostedDateGreaterThanEqualOrderByCreatedAtDesc(
+        member: Member,
+        postedDate: LocalDate,
+        pageable: Pageable
+    ): Slice<Post>
 
     // 특정 사용자의 특정 기간 게시글 조회 (캘린더용)
     fun findAllByMemberAndPostedDateBetween(member: Member, startDate: LocalDate, endDate: LocalDate): List<Post>

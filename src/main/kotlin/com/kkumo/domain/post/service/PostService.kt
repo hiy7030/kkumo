@@ -13,6 +13,7 @@ import com.kkumo.global.error.BusinessException
 import com.kkumo.global.error.ErrorCode
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Slice
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
@@ -221,6 +222,72 @@ class PostService(
 
         // 7. Post 엔티티를 FeedResponse로 변환
         return posts.map { post ->
+            val postId = post.id ?: 0L
+            val postCountMap = reactionCountMap[postId] ?: emptyMap()
+
+            // 모든 ReactionType에 대해 ReactionInfo 생성
+            val allReactions = ReactionType.entries.associateWith { type ->
+                val count = postCountMap[type] ?: 0
+                val reactors = reactionReactorMap[postId to type] ?: emptyList()
+                val isMeReacted = myReactionMap[postId to type] ?: false
+                HomeResponse.ReactionInfo(count, reactors, isMeReacted)
+            }
+
+            HomeResponse.FeedResponse.from(post, allReactions)
+        }
+    }
+
+    /**
+     * 내 기록 조회 (마이페이지 무한 스크롤용)
+     * - 로그인한 사용자의 Base Date 이후 게시글
+     * - Slice 기반 페이징 (COUNT 쿼리 없음)
+     * - 실제 Reaction 개수 집계
+     * - 최신순 정렬
+     *
+     * @param member 조회할 사용자
+     * @param pageable 페이징 정보
+     * @return Slice<FeedResponse>
+     */
+    fun getMyFeedList(member: Member, pageable: Pageable): Slice<HomeResponse.FeedResponse> {
+        // 1. 사용자의 Base Date 이후 게시글 조회 (Slice 사용)
+        val baseDate = kkumoProperties.baseDate
+        val postSlice = postRepository.findSliceByMemberAndPostedDateGreaterThanEqualOrderByCreatedAtDesc(
+            member,
+            baseDate,
+            pageable
+        )
+
+        val posts = postSlice.content
+
+        // 2. 모든 게시글의 리액션 개수 집계
+        val reactionCounts = reactionRepository.countByPostsGroupByType(posts)
+
+        // 3. 모든 게시글의 최근 반응자 조회 (Window Function으로 DB 레벨에서 TOP 3 추출)
+        val postIds = posts.mapNotNull { it.id }
+        val reactionReactors = reactionRepository.findRecentReactorsByPosts(postIds)
+
+        // 4. 현재 사용자가 남긴 활성화된 리액션 조회 (N+1 방지: Projection 사용)
+        val myActiveReactions = reactionRepository.findMyActiveReactions(member.id, postIds)
+        val myReactionMap = myActiveReactions
+            .groupBy { it.getPostId() to it.getEmojiType() }
+            .mapValues { true }
+
+        // 5. Post ID별로 ReactionType -> Count 맵 생성
+        val reactionCountMap = reactionCounts
+            .groupBy { it.getPostId() }
+            .mapValues { (_, projections) ->
+                projections.associate { it.getReactionType() to it.getCount().toInt() }
+            }
+
+        // 6. Post ID별, ReactionType별로 최근 반응자 리스트 생성 (최대 3명)
+        val reactionReactorMap = reactionReactors
+            .groupBy { it.getPostId() to it.getReactionType() }
+            .mapValues { (_, projections) ->
+                projections.take(3).map { it.getReactorNickname() }
+            }
+
+        // 7. Post 엔티티를 FeedResponse로 변환하여 Slice로 반환
+        return postSlice.map { post ->
             val postId = post.id ?: 0L
             val postCountMap = reactionCountMap[postId] ?: emptyMap()
 

@@ -19,7 +19,7 @@
 
         <div th:if="${!hasPostedToday}" class="text-center">
             <p class="text-gray-600 text-sm mb-3">
-                <span th:text="${currentStreak + 1}">10</span>일 연속 기록 달성 마감까지 남은 시간</p>
+                <span th:text="${currentStreak + 1}">10</span>일 연속 기록 달성까지</p>
             <div id="timer" class="text-5xl md:text-6xl font-bold text-[#8294C4] mb-6">
                 00:00:00
             </div>
@@ -28,7 +28,7 @@
                 👑 획득까지 <span th:text="${7 - currentStreak}">10</span>일 남았습니다.
             </div>
             <div th:if="${currentStreak >= 7}" class="text-center">
-                경고🚨<br/>지금 기록하지 않으면 👑이 사라집니다
+                경고🚨<br/>지금 기록하지 않으면 👑 이 사라집니다
             </div>
             </p>
         </div>
@@ -41,7 +41,10 @@
             <div th:if="${currentStreak < 7}" class="text-center">
                 👑 획득까지 <span th:text="${7 - currentStreak}">10</span>일 남았습니다.
             </div>
-            <div th:if="${currentStreak >= 7}" class="text-center">
+            <div th:if="${currentStreak == 7}" class="text-center">
+                축하합니다! 👑 획득에 성공하셨습니다!
+            </div>
+            <div th:if="${currentStreak > 7}" class="text-center">
                 오늘도 👑 유지에 성공하셨습니다!
             </div>
             </p>
@@ -49,32 +52,30 @@
 
     </section>
 
-    <section>
+    <section id="feedSection">
         <div class="flex items-center justify-center gap-4 mb-6">
-            <a th:if="${isPrevAllowed}"
-               th:href="@{/kkumo/v1/home(date=${prevDate})}"
-               class="text-3xl text-[#8294C4] hover:text-[#6E80B0] transition">
+            <button
+               th:data-prev-date="${prevDate}"
+               th:data-allowed="${isPrevAllowed}"
+               onclick="changeDateSmooth('prev', this)"
+               th:class="${isPrevAllowed ? 'text-3xl text-[#8294C4] hover:text-[#6E80B0] transition cursor-pointer' : 'text-3xl text-gray-300 cursor-not-allowed'}">
                 ◀
-            </a>
-            <span th:if="${!isPrevAllowed}" class="text-3xl text-gray-300 cursor-not-allowed">
-                ◀
-            </span>
+            </button>
 
-            <div class="text-3xl font-black tracking-widest text-gray-800" th:text="${formattedDate}">
+            <div id="currentDate" class="text-3xl font-black tracking-widest text-gray-800" th:text="${formattedDate}">
                 251217
             </div>
 
-            <a th:if="${!isToday}"
-               th:href="@{/kkumo/v1/home(date=${nextDate})}"
-               class="text-3xl text-[#8294C4] hover:text-[#6E80B0] transition">
+            <button
+               th:data-next-date="${nextDate}"
+               th:data-is-today="${isToday}"
+               onclick="changeDateSmooth('next', this)"
+               th:class="${!isToday ? 'text-3xl text-[#8294C4] hover:text-[#6E80B0] transition cursor-pointer' : 'text-3xl text-gray-300 cursor-not-allowed'}">
                 ▶
-            </a>
-            <span th:if="${isToday}" class="text-3xl text-gray-300 cursor-not-allowed">
-                ▶
-            </span>
+            </button>
         </div>
 
-        <div class="text-center mb-6">
+        <div id="feedInfo" class="text-center mb-6">
             <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-1">
                 <span th:if="${isToday}">오늘 </span>함께 기록한 꾸모들
             </h3>
@@ -85,7 +86,7 @@
             </p>
         </div>
 
-        <div class="space-y-4">
+        <div id="feedList" class="space-y-4">
             <div th:each="item : ${feedList}">
                 <div th:replace="~{fragments/feed :: feedItem(${item}, 'relative', true)}"></div>
             </div>
@@ -172,6 +173,56 @@
                 location.href = '/kkumo/v1/post/create';
             }
         });
+    });
+
+    // ==================== Smooth Date Change ====================
+    async function changeDateSmooth(direction, button) {
+        // 버튼이 비활성화된 경우 무시
+        if (direction === 'prev' && button.dataset.allowed === 'false') return;
+        if (direction === 'next' && button.dataset.isToday === 'true') return;
+
+        // 날짜 가져오기
+        const targetDate = direction === 'prev'
+            ? button.dataset.prevDate
+            : button.dataset.nextDate;
+
+        if (!targetDate) return;
+
+        const feedSection = document.getElementById('feedSection');
+
+        try {
+            // 1. 새로운 페이지 전체를 가져오기
+            const response = await fetch(`/kkumo/v1/home?date=${targetDate}`);
+            const html = await response.text();
+
+            // 2. 임시 DOM 생성하여 필요한 부분만 추출
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // 3. 피드 섹션 교체
+            const newFeedSection = doc.getElementById('feedSection');
+            if (newFeedSection) {
+                feedSection.innerHTML = newFeedSection.innerHTML;
+            }
+
+            // 4. URL 업데이트 (뒤로가기 지원)
+            window.history.pushState({date: targetDate}, '', `/kkumo/v1/home?date=${targetDate}`);
+
+            // 5. 상대 시간 업데이트 재실행
+            updateRelativeTimes();
+
+        } catch (error) {
+            console.error('날짜 변경 실패:', error);
+            // 에러 발생 시 페이지 전체 새로고침
+            window.location.href = `/kkumo/v1/home?date=${targetDate}`;
+        }
+    }
+
+    // 뒤로가기/앞으로가기 지원
+    window.addEventListener('popstate', function(event) {
+        if (event.state && event.state.date) {
+            location.reload();
+        }
     });
 
     // ==================== Image Viewer (Lightbox) Functions ====================

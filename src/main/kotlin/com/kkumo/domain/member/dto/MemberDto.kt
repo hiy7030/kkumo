@@ -1,12 +1,14 @@
 package com.kkumo.domain.member.dto
 
 import com.kkumo.domain.member.Member
+import com.kkumo.global.validation.PasswordMatch
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 
 object MemberDto {
 
+    @PasswordMatch
     data class SignupRequest(
         @field:NotBlank(message = "이메일은 필수입니다.")
         @field:Email(message = "올바른 이메일 형식이 아닙니다.")
@@ -15,6 +17,9 @@ object MemberDto {
         @field:NotBlank(message = "비밀번호는 필수입니다.")
         @field:Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다.")
         val password: String,
+
+        @field:NotBlank(message = "비밀번호 확인은 필수입니다.")
+        val passwordConfirm: String,
 
         @field:NotBlank(message = "닉네임은 필수입니다.")
         @field:Size(min = 2, max = 20, message = "닉네임은 2~20자 사이여야 합니다.")
@@ -60,6 +65,7 @@ object MemberDto {
         val myEmoji: String
     )
 
+    @PasswordMatch(passwordField = "newPassword", passwordConfirmField = "newPasswordConfirm")
     data class PasswordResetRequest(
         @field:NotBlank(message = "이메일은 필수입니다.")
         @field:Email(message = "올바른 이메일 형식이 아닙니다.")
@@ -71,6 +77,9 @@ object MemberDto {
 
         @field:NotBlank(message = "새 비밀번호는 필수입니다.")
         @field:Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다.")
-        val newPassword: String
+        val newPassword: String,
+
+        @field:NotBlank(message = "비밀번호 확인은 필수입니다.")
+        val newPasswordConfirm: String
     )
 }
