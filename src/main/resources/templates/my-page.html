@@ -50,8 +50,7 @@
                     onclick="openProfileUpdateModal()"
                     class="w-full bg-[#DBDFEA] hover:bg-[#ACB1D6] text-[#8294C4] hover:text-white font-bold py-3 rounded-xl transition-colors duration-200 flex items-center justify-center space-x-2"
             >
-                <span class="text-xl">✏️</span>
-                <span>닉첸</span>
+                <span>프로필 수정</span>
             </button>
 
             <form th:action="@{/logout}" method="post" class="m-0">
@@ -59,7 +58,6 @@
                         type="submit"
                         class="w-full bg-[#FFA7A7] hover:bg-[#FF9090] text-white font-bold py-3 rounded-xl transition-colors duration-200 flex items-center justify-center space-x-2"
                 >
-                    <span class="text-xl">🚪</span>
                     <span>로그아웃</span>
                 </button>
             </form>
@@ -78,7 +76,7 @@
                 <div th:if="${item.isPrivate}"
                      class="px-4 mt-2 flex items-center space-x-1 text-xs text-[#8294C4]">
                     <span>🔒</span>
-                    <span class="font-semibold">비공개 기록</span>
+                    <span class="font-semibold">비밀글</span>
                 </div>
             </div>
         </div>
