@@ -2,30 +2,19 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <link th:replace="~{fragments/layout :: favicon}" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>새 기록 - KKUMO</title>
     <meta th:replace="~{fragments/layout :: viewTransitionMeta}" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2/dist/browser-image-compression.js"></script>
     <style th:replace="~{fragments/layout :: fadeInAnimation}"></style>
-    <style>
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -45%);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, -50%);
-            }
-        }
-
-        .modal-content {
-            animation: fadeInUp 0.3s ease-out;
-        }
-    </style>
+    <style th:replace="~{fragments/layout :: commonAlertModalStyle}"></style>
 </head>
 <body class="bg-white min-h-screen">
+
+<!-- Common Alert Modal -->
+<div th:replace="~{fragments/layout :: commonAlertModal}"></div>
 
 <!-- Top Bar -->
 <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-[#DBDFEA]">
@@ -147,23 +136,7 @@
     </div>
 </div>
 
-<!-- Custom Alert Modal -->
-<div id="customAlertModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
-    <!-- Modal Box -->
-    <div class="modal-content fixed top-1/2 left-1/2 w-11/12 max-w-md bg-white rounded-2xl shadow-lg border border-[#DBDFEA] p-8" style="transform: translate(-50%, -50%);">
-        <!-- Message -->
-        <p id="alertMessage" class="text-slate-800 font-medium text-lg text-center mb-6">
-            메시지가 표시됩니다.
-        </p>
-
-        <!-- Confirm Button -->
-        <button
-            id="alertConfirmBtn"
-            class="w-full rounded-full bg-[#8294C4] text-white font-bold py-3 px-6 hover:bg-[#6E80B0] active:scale-95 transition duration-200 focus:outline-none focus:ring-2 focus:ring-[#ACB1D6] focus:ring-offset-2">
-            확인
-        </button>
-    </div>
-</div>
+<script th:replace="~{fragments/layout :: commonAlertModalScript}"></script>
 
 <!-- JavaScript -->
 <script th:inline="javascript">
@@ -179,30 +152,6 @@
     const submitBtn = document.getElementById('submitBtn');
 
     let selectedFile = null;
-
-    // ==================== Custom Alert Modal ====================
-    const customAlertModal = document.getElementById('customAlertModal');
-    const alertMessage = document.getElementById('alertMessage');
-    const alertConfirmBtn = document.getElementById('alertConfirmBtn');
-
-    function showAlert(message) {
-        alertMessage.textContent = message;
-        customAlertModal.classList.remove('hidden');
-        alertConfirmBtn.focus();
-    }
-
-    function hideAlert() {
-        customAlertModal.classList.add('hidden');
-    }
-
-    alertConfirmBtn.addEventListener('click', hideAlert);
-
-    // Enter key handler for modal
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter' && !customAlertModal.classList.contains('hidden')) {
-            hideAlert();
-        }
-    });
 
     // ==================== Auto Resize Textarea ====================
     contentInput.addEventListener('input', function() {
@@ -235,13 +184,13 @@
 
         // 파일 타입 체크
         if (!file.type.startsWith('image/')) {
-            showAlert('이미지 파일만 선택할 수 있습니다.');
+            showModal('이미지 파일만 선택할 수 있습니다.');
             return;
         }
 
         // 파일 크기 체크 (30MB 제한 - 압축 전 원본 파일)
         if (file.size > 30 * 1024 * 1024) {
-            showAlert('이미지 파일 크기는 30MB를 초과할 수 없습니다.');
+            showModal('이미지 파일 크기는 30MB를 초과할 수 없습니다.');
             return;
         }
 
@@ -276,7 +225,7 @@
     submitBtn.addEventListener('click', async function() {
         // 이미지 필수 체크
         if (!selectedFile) {
-            showAlert('사진은 필수입니다. 사진을 선택해주세요.');
+            showModal('사진은 필수입니다. 사진을 선택해주세요.');
             return;
         }
 
@@ -325,13 +274,13 @@
                 location.href = '/kkumo/v1/home';
             } else {
                 // 실패 시 (예: 1일 1회 제한)
-                showAlert(result.message || '기록에 실패했습니다.');
+                showModal(result.message || '기록에 실패했습니다.');
                 submitBtn.disabled = false;
                 submitBtn.textContent = '기록하기';
             }
         } catch (error) {
             console.error('Error:', error);
-            showAlert('이미지 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+            showModal('이미지 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
             submitBtn.disabled = false;
             submitBtn.textContent = '기록하기';
         }

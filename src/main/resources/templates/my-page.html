@@ -2,15 +2,18 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <link th:replace="~{fragments/layout :: favicon}" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>마이페이지 - KKUMO</title>
     <meta th:replace="~{fragments/layout :: viewTransitionMeta}" />
     <script src="https://cdn.tailwindcss.com"></script>
     <th:block th:replace="~{fragments/layout :: alreadyPostedModalStyle}"></th:block>
+    <th:block th:replace="~{fragments/layout :: commonAlertModalStyle}"></th:block>
     <style th:replace="~{fragments/layout :: fadeInAnimation}"></style>
 </head>
 <body class="bg-white min-h-screen pb-24">
 
+<div th:replace="~{fragments/layout :: commonAlertModal}"></div>
 <div th:replace="~{fragments/layout :: header(${hasCrown ? '👑' : '🐢'})}"></div>
 
 <main class="max-w-3xl mx-auto px-4 py-6 space-y-8">
@@ -266,6 +269,7 @@
 </script>
 
 <div th:replace="~{fragments/layout :: alreadyPostedModalScript}"></div>
+<script th:replace="~{fragments/layout :: commonAlertModalScript}"></script>
 
 <!-- Profile Update Modal Script -->
 <script type="module">
@@ -494,7 +498,7 @@
             }
         } catch (error) {
             console.error('Error loading more posts:', error);
-            alert('게시글을 불러오는데 실패했습니다.');
+            showModal('게시글을 불러오는데 실패했습니다.');
         } finally {
             infiniteScroll.isLoading = false;
             infiniteScroll.loadingIndicator.classList.add('hidden');

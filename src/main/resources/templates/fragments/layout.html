@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
 
+    <link th:fragment="favicon" rel="icon"
+          href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐢</text></svg>">
+
     <!-- ==================== View Transition Meta Fragment ==================== -->
     <meta th:fragment="viewTransitionMeta" name="view-transition" content="same-origin" />
 
@@ -89,7 +92,11 @@
             const hasPostedToday = /*[[${hasPostedToday}]]*/ false;
             uploadBtn.addEventListener('click', function() {
                 if (hasPostedToday) {
-                    alert('오늘의 기록을 이미 완료했어요! 내일 또 만나요 😊');
+                    if (typeof openAlreadyPostedModal === 'function') {
+                        openAlreadyPostedModal();
+                    } else if (typeof showModal === 'function') {
+                        showModal('오늘의 기록을 이미 완료했어요! 내일 또 만나요 😊');
+                    }
                 } else {
                     location.href = '/kkumo/v1/post/create';
                 }
@@ -156,6 +163,98 @@
                 if (event.key === 'Enter' || event.key === 'Escape') {
                     closeAlreadyPostedModal();
                 }
+            }
+        });
+    </script>
+</th:block>
+
+<!-- ==================== Common Alert Modal Fragment ==================== -->
+<div th:fragment="commonAlertModal" id="commonAlertModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[200] hidden items-center justify-center">
+    <div class="modal-content fixed top-1/2 left-1/2 w-11/12 max-w-md bg-white rounded-2xl shadow-lg border border-[#DBDFEA] p-8" style="transform: translate(-50%, -50%);">
+        <div id="commonAlertEmoji" class="text-5xl mb-4 text-center hidden"></div>
+        <p id="commonAlertMessage" class="text-slate-800 font-medium text-lg text-center mb-6"></p>
+        <button id="commonAlertConfirmBtn" class="w-full rounded-full bg-[#8294C4] text-white font-bold py-3 px-6 hover:bg-[#6E80B0] active:scale-95 transition duration-200 focus:outline-none focus:ring-2 focus:ring-[#ACB1D6] focus:ring-offset-2">
+            확인
+        </button>
+    </div>
+</div>
+
+<!-- ==================== Common Alert Modal Style Fragment ==================== -->
+<th:block th:fragment="commonAlertModalStyle">
+    <style>
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -45%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .modal-content {
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        #commonAlertModal.show {
+            display: flex !important;
+        }
+    </style>
+</th:block>
+
+<!-- ==================== Common Alert Modal Script Fragment ==================== -->
+<th:block th:fragment="commonAlertModalScript">
+    <script>
+        // Common Alert Modal Functions
+        const commonAlertModal = document.getElementById('commonAlertModal');
+        const commonAlertMessage = document.getElementById('commonAlertMessage');
+        const commonAlertEmoji = document.getElementById('commonAlertEmoji');
+        const commonAlertConfirmBtn = document.getElementById('commonAlertConfirmBtn');
+        let modalCallback = null;
+
+        function showModal(message, emojiOrCallback = null, callback = null) {
+            // 파라미터 유연성: showModal(msg), showModal(msg, callback), showModal(msg, emoji, callback)
+            let emoji = null;
+            let finalCallback = null;
+
+            if (typeof emojiOrCallback === 'function') {
+                finalCallback = emojiOrCallback;
+            } else if (typeof emojiOrCallback === 'string') {
+                emoji = emojiOrCallback;
+                finalCallback = callback;
+            }
+
+            commonAlertMessage.textContent = message;
+
+            if (emoji) {
+                commonAlertEmoji.textContent = emoji;
+                commonAlertEmoji.classList.remove('hidden');
+            } else {
+                commonAlertEmoji.classList.add('hidden');
+            }
+
+            commonAlertModal.classList.add('show');
+            commonAlertConfirmBtn.focus();
+            modalCallback = finalCallback;
+        }
+
+        function hideModal() {
+            commonAlertModal.classList.remove('show');
+            commonAlertEmoji.classList.add('hidden');
+            if (modalCallback) {
+                modalCallback();
+                modalCallback = null;
+            }
+        }
+
+        commonAlertConfirmBtn.addEventListener('click', hideModal);
+
+        // Enter key handler for modal
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && commonAlertModal.classList.contains('show')) {
+                event.preventDefault();
+                hideModal();
             }
         });
     </script>

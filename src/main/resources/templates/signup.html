@@ -2,13 +2,19 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <link th:replace="~{fragments/layout :: favicon}" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>회원가입 - KKUMO</title>
     <meta th:replace="~{fragments/layout :: viewTransitionMeta}" />
     <script src="https://cdn.tailwindcss.com"></script>
     <style th:replace="~{fragments/layout :: fadeInAnimation}"></style>
+    <style th:replace="~{fragments/layout :: commonAlertModalStyle}"></style>
 </head>
 <body class="bg-white min-h-screen flex items-center justify-center p-4">
+
+<!-- Common Alert Modal -->
+<div th:replace="~{fragments/layout :: commonAlertModal}"></div>
+
 <div class="page-content bg-white rounded-2xl shadow-sm p-8 max-w-md w-full border border-[#DBDFEA]">
     <div class="text-center mb-8">
         <div class="text-4xl mb-4">👑</div>
@@ -99,6 +105,8 @@
     </div>
 </div>
 
+<script th:replace="~{fragments/layout :: commonAlertModalScript}"></script>
+
 <script type="module">
     import { EmojiButton } from 'https://unpkg.com/@joeattardi/emoji-button@4.6.4/dist/index.js';
 
@@ -137,7 +145,7 @@
         const selectedEmoji = selection.emoji;
 
         if (selectedEmoji === '👑') {
-            alert("👑 왕관은 사용할 수 없습니다.");
+            showModal("👑 왕관은 사용할 수 없습니다.");
             return;
         }
 
@@ -202,7 +210,7 @@
     sendCodeBtn.addEventListener('click', async () => {
         const email = emailInput.value;
         if (!email) {
-            alert('이메일을 입력해주세요.');
+            showModal('이메일을 입력해주세요.');
             return;
         }
 
@@ -215,17 +223,18 @@
             const result = await response.json();
 
             if (result.success) {
-                alert('✉️ 인증번호가 전송되었습니다. 이메일을 확인해주세요.');
-                verificationSection.classList.remove('hidden');
-                emailInput.disabled = true; // 이메일 수정 불가
-                sendCodeBtn.disabled = true;
-                sendCodeBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                startTimer(180); // 3분 타이머 시작
+                showModal('✉️ 인증번호가 전송되었습니다. 이메일을 확인해주세요.', () => {
+                    verificationSection.classList.remove('hidden');
+                    emailInput.disabled = true; // 이메일 수정 불가
+                    sendCodeBtn.disabled = true;
+                    sendCodeBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    startTimer(180); // 3분 타이머 시작
+                });
             } else {
-                alert(result.error ? result.error.message : '전송 실패');
+                showModal(result.error ? result.error.message : '전송 실패');
             }
         } catch (error) {
-            alert('오류가 발생했습니다.');
+            showModal('오류가 발생했습니다.');
             console.error(error);
         }
     });
@@ -236,7 +245,7 @@
         const code = verificationCode.value;
 
         if (!code || code.length !== 6) {
-            alert('6자리 인증번호를 입력해주세요.');
+            showModal('6자리 인증번호를 입력해주세요.');
             return;
         }
 
@@ -258,10 +267,10 @@
                 verifyCodeBtn.disabled = true;
                 verifyCodeBtn.classList.add('opacity-50', 'cursor-not-allowed');
             } else {
-                alert(result.error ? result.error.message : '인증 실패');
+                showModal(result.error ? result.error.message : '인증 실패');
             }
         } catch (error) {
-            alert('오류가 발생했습니다.');
+            showModal('오류가 발생했습니다.');
             console.error(error);
         }
     });
@@ -296,13 +305,13 @@
 
         // 유효성 검사
         if (!isEmailVerified) {
-            alert('이메일 인증을 완료해주세요.');
+            showModal('이메일 인증을 완료해주세요.');
             return;
         }
 
         const currentEmoji = hiddenInput.value;
         if (!currentEmoji) {
-            alert('이모지를 선택해주세요!');
+            showModal('이모지를 선택해주세요!');
             return;
         }
 
@@ -310,7 +319,7 @@
         const passwordConfirm = passwordConfirmInput.value;
 
         if (password !== passwordConfirm) {
-            alert('비밀번호가 일치하지 않습니다.');
+            showModal('비밀번호가 일치하지 않습니다.');
             return;
         }
 
@@ -331,13 +340,14 @@
             const result = await response.json();
 
             if (result.success) {
-                alert('환영합니다! 👑 로그인 페이지로 이동합니다.');
-                window.location.href = '/login';
+                showModal('환영합니다! 👑 로그인 페이지로 이동합니다.', () => {
+                    window.location.href = '/login';
+                });
             } else {
-                alert(result.error ? result.error.message : '가입 실패');
+                showModal(result.error ? result.error.message : '가입 실패');
             }
         } catch (error) {
-            alert('오류가 발생했습니다.');
+            showModal('오류가 발생했습니다.');
             console.error(error);
         }
     });
