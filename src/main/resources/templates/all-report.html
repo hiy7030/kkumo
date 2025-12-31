@@ -67,11 +67,13 @@
 
             <!-- Card Body: 기록한 멤버 (Success Group) -->
             <div th:if="${!summary.postedMembers.isEmpty()}" class="mb-4">
-                <div class="flex flex-wrap gap-4">
+                <div class="grid grid-cols-5 gap-y-4 gap-x-2">
                     <div th:each="member : ${summary.postedMembers}"
                          class="flex flex-col items-center gap-1">
                         <span th:text="${member.emoji}" class="text-3xl">😀</span>
-                        <span th:text="${member.nickname}" class="text-xs text-slate-600">닉네임</span>
+
+                        <span th:text="${member.nickname}"
+                              class="text-xs text-slate-600 text-center w-full truncate px-1">닉네임</span>
                     </div>
                 </div>
             </div>
@@ -82,13 +84,17 @@
             </div>
 
             <!-- Card Footer: 미참여자 또는 완료 메시지 -->
-            <div th:if="${!summary.notPostedMembers.isEmpty()}" class="pt-3 border-t border-[#DBDFEA]">
-                <p class="text-xs text-slate-400 leading-relaxed">
-                    <span>💤 미참여: </span>
-                    <span th:each="member, iterStat : ${summary.notPostedMembers}">
-                        <span th:text="${member.nickname}">닉네임</span><span th:if="${!iterStat.last}">, </span>
-                    </span>
-                </p>
+            <div th:if="${!summary.notPostedMembers.isEmpty()}" class="pt-4 border-t border-[#DBDFEA]">
+                <p class="text-xs text-slate-400 mb-3 font-medium">💤 미참여</p>
+
+                <div class="grid grid-cols-5 gap-y-3 gap-x-2">
+                    <div th:each="member : ${summary.notPostedMembers}"
+                         class="flex flex-col items-center gap-0.5 opacity-50 grayscale-[30%]">
+                        <span th:text="${member.emoji}" class="text-2xl">🐢</span>
+                        <span th:text="${member.nickname}"
+                              class="text-[10px] text-slate-500 text-center w-full truncate px-1">닉네임</span>
+                    </div>
+                </div>
             </div>
 
             <!-- 모두 참여 성공 메시지 -->

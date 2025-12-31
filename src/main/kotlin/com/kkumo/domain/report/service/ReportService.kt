@@ -54,7 +54,7 @@ class ReportService(
         // Map<LocalDate, Set<Long>> 형태로 변환하여 빠른 조회
         val dateToMemberIdsMap = posts.groupBy { it.postedDate }
             .mapValues { (_, dayPosts) ->
-                dayPosts.mapNotNull { it.member.id }.toSet()
+                dayPosts.map { it.member.id }.toSet()
             }
 
         // 5. 일별 요약 생성 (IntRange 활용)
