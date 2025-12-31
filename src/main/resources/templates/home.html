@@ -41,6 +41,9 @@
             <div th:if="${currentStreak < 7}" class="text-center">
                 👑 획득까지 <span th:text="${7 - currentStreak}">10</span>일 남았습니다.
             </div>
+            <div th:if="${currentStreak >= 7}" class="text-center">
+                오늘도 👑 유지에 성공하셨습니다!
+            </div>
             </p>
         </div>
 
