@@ -30,7 +30,7 @@ class Reaction(
     val member: Member,
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "emoji_type", nullable = false)
+    @Column(name = "emoji_type", nullable = false, length = 20)
     var emojiType: ReactionType,
 
     @Column(name = "is_active", nullable = false)

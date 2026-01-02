@@ -10,7 +10,7 @@ enum class ReactionType(
     CLAP("👏", "축하해요"),
     SAD("😢", "슬퍼요"),
     LOL("😆", "웃겨요"),
-    CHEER_UP("💪","힘내요"),
+    CHEERUP("💪","힘내요"),
     CHECK("✅", "확인"),
     ;
 

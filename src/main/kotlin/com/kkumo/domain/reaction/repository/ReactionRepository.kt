@@ -10,6 +10,16 @@ import org.springframework.data.jpa.repository.Query
 interface ReactionRepository : JpaRepository<Reaction, Long> {
 
     /**
+     * 특정 멤버가 특정 게시글에 특정 타입의 리액션을 조회
+     *
+     * @param member 조회할 멤버
+     * @param post 조회할 게시글
+     * @param emojiType 리액션 타입
+     * @return 기존 리액션 (없으면 null)
+     */
+    fun findByMemberAndPostAndEmojiType(member: Member, post: Post, emojiType: ReactionType): Reaction?
+
+    /**
      * 특정 멤버가 특정 게시글들에 남긴 리액션들을 조회 (배치 처리용)
      *
      * @param member 조회할 멤버

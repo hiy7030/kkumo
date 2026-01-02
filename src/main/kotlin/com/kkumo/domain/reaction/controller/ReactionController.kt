@@ -29,6 +29,14 @@ class ReactionController(
         @AuthenticationPrincipal userDetails: UserDetails?,
         @RequestBody request: ReactionRequest.Batch
     ): ApiResponse<Unit> {
+        println("==================== BATCH REACTION REQUEST ====================")
+        println("User: ${userDetails?.username}")
+        println("Reactions count: ${request.reactions.size}")
+        request.reactions.forEachIndexed { index, reaction ->
+            println("  [$index] postId=${reaction.postId}, type=${reaction.reactionType}")
+        }
+        println("================================================================")
+
         userDetails?.let {
             reactionService.saveReactionsBatch(it, request)
         }?: throw BusinessException(ErrorCode.UNAUTHORIZED)

@@ -39,34 +39,34 @@ class ReactionService(
         // 0. 안전장치: 중복 제거 (postId + reactionType 기준)
         // 프론트에서 압축되었더라도, 혹시 모를 중복 요청에 대비
         val uniqueReactions = request.reactions.distinctBy { Pair(it.postId, it.reactionType) }
+        println("[Service] Original: ${request.reactions.size}, After distinct: ${uniqueReactions.size}")
 
-        // 1. Post ID 목록 추출
-        val postIds = uniqueReactions.map { it.postId }.distinct()
-
-        // 2. 모든 게시글 조회 (존재 여부 검증)
-        val posts = postRepository.findAllById(postIds)
-        val postMap = posts.associateBy { it.id }
-
-        // 3. 기존 리액션 조회 및 Map으로 변환 (postId + emojiType을 키로 사용)
-        val existingReactions = reactionRepository.findAllByMemberAndPostIdIn(member, postIds)
-        val existingReactionMap = existingReactions.associateBy {
-            "${it.post.id}_${it.emojiType}"
-        }
-
-        // 4. 토글 로직 수행
+        // 1. 리액션별로 Entity 생성 리스트
         val reactionsToSave = mutableListOf<Reaction>()
 
+        // 2. 각 리액션 요청별로 처리
         uniqueReactions.forEach { req ->
-            val post = postMap[req.postId] ?: return@forEach
-            val key = "${req.postId}_${req.reactionType}"
-            val existingReaction = existingReactionMap[key]
+            // 2-1. Post 조회 (존재하지 않으면 스킵)
+            val post = postRepository.findById(req.postId).orElse(null) ?: run {
+                println("[Service] ⚠️ Post not found: ${req.postId}")
+                return@forEach
+            }
+
+            // 2-2. 기존 리액션 조회 (member + post + emojiType 정확히 매칭)
+            val existingReaction = reactionRepository.findByMemberAndPostAndEmojiType(
+                member = member,
+                post = post,
+                emojiType = req.reactionType
+            )
 
             if (existingReaction != null) {
-                // Case A: 기존 리액션 존재 -> isActive 반전 (Toggle)
+                // Case A: 기존 리액션 존재 -> isActive만 토글
+                println("[Service] Toggle existing: postId=${post.id}, type=${req.reactionType}, ${existingReaction.isActive} -> ${!existingReaction.isActive}")
                 existingReaction.isActive = !existingReaction.isActive
                 reactionsToSave.add(existingReaction)
             } else {
                 // Case B: 기존 리액션 없음 -> 새로 생성 (isActive = true)
+                println("[Service] Create new: postId=${post.id}, type=${req.reactionType}")
                 val newReaction = Reaction(
                     post = post,
                     member = member,
@@ -77,7 +77,16 @@ class ReactionService(
             }
         }
 
-        // 5. 일괄 저장
-        reactionRepository.saveAll(reactionsToSave)
+        // 3. Entity 전부 일괄 저장
+        if (reactionsToSave.isNotEmpty()) {
+            println("[Service] Reactions to save: ${reactionsToSave.size}")
+            reactionsToSave.forEachIndexed { index, reaction ->
+                println("  [$index] postId=${reaction.post.id}, type=${reaction.emojiType}, isActive=${reaction.isActive}")
+            }
+            reactionRepository.saveAll(reactionsToSave)
+            println("[Service] ✅ Batch save completed")
+        } else {
+            println("[Service] ⚠️ No reactions to save")
+        }
     }
 }

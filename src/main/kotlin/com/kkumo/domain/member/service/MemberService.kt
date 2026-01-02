@@ -5,6 +5,7 @@ import com.kkumo.domain.member.repository.MemberRepository
 import com.kkumo.domain.member.dto.MemberDto
 import com.kkumo.global.error.BusinessException
 import com.kkumo.global.error.ErrorCode
+import com.kkumo.global.utils.EmojiUtils
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,11 +19,15 @@ class MemberService(
 
     @Transactional
     fun signup(request: MemberDto.SignupRequest): MemberDto.SignupResponse {
-        validateDuplicateMember(request)
-        validateCrownEmoji(request.myEmoji)
+        // 이모지 정규화 (Variant Selector 제거)
+        val normalizedEmoji = EmojiUtils.normalize(request.myEmoji)
+        val normalizedRequest = request.copy(myEmoji = normalizedEmoji)
 
-        val encodedPassword = passwordEncoder.encode(request.password)
-        val member = request.toEntity(encodedPassword)
+        validateDuplicateMember(normalizedRequest)
+        validateCrownEmoji(normalizedEmoji)
+
+        val encodedPassword = passwordEncoder.encode(normalizedRequest.password)
+        val member = normalizedRequest.toEntity(encodedPassword)
         val savedMember = memberRepository.save(member)
 
         return MemberDto.SignupResponse.from(savedMember)
@@ -55,28 +60,31 @@ class MemberService(
 
     @Transactional
     fun updateProfile(email: String, request: MemberDto.UpdateRequest) {
-        // 1. 왕관 이모지 검증
+        // 1. 이모지 정규화 (Variant Selector 제거)
+        val normalizedEmoji = EmojiUtils.normalize(request.myEmoji)
+
+        // 2. 회원 조회 및 왕관 이모지 검증
         val member = memberRepository.findByEmail(email)
             ?: throw BusinessException(ErrorCode.MEMBER_NOT_FOUND)
 
-        validateCrownEmoji(request.myEmoji)
+        validateCrownEmoji(normalizedEmoji)
 
-        // 2. 닉네임 중복 검사 (본인 제외)
+        // 3. 닉네임 중복 검사 (본인 제외)
         memberRepository.findByNickname(request.nickname)?.let { existingMember ->
             if (existingMember.id != member.id) {
                 throw BusinessException(ErrorCode.NICKNAME_ALREADY_EXISTS)
             }
         }
 
-        // 3. 이모지 중복 검사 (본인 제외)
-        memberRepository.findByMyEmoji(request.myEmoji)?.let { existingMember ->
+        // 4. 이모지 중복 검사 (본인 제외) - 정규화된 이모지로 검사
+        memberRepository.findByMyEmoji(normalizedEmoji)?.let { existingMember ->
             if (existingMember.id != member.id) {
                 throw BusinessException(ErrorCode.EMOJI_ALREADY_EXISTS)
             }
         }
 
-        // 4. 프로필 업데이트 (Dirty Checking)
-        member.update(request.nickname, request.myEmoji)
+        // 5. 프로필 업데이트 (Dirty Checking) - 정규화된 이모지 저장
+        member.update(request.nickname, normalizedEmoji)
     }
 
     @Transactional

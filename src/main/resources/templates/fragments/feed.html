@@ -280,7 +280,7 @@
                 'CLAP': '👏',
                 'SAD': '😢',
                 'LOL': '😆',
-                'CHEER_UP': '💪',
+                'CHEERUP': '💪',
                 'CHECK': '✅'
             };
 
@@ -341,18 +341,29 @@
         }
 
         // ==================== Batch Send Reactions on Page Unload ====================
+        let isSending = false;  // 중복 전송 방지 플래그
+
         function sendReactionsBatch() {
+            // 중복 호출 방지
+            if (isSending) {
+                console.log('⚠️ Already sending batch, skip duplicate call');
+                return;
+            }
+
             if (reactionQueue.length === 0) {
                 console.log('No reactions to send');
                 return;
             }
+
+            isSending = true;  // 전송 시작
 
             // ==================== Queue Compression Logic ====================
             // 같은 postId + reactionType의 클릭 횟수를 카운트
             const reactionMap = new Map();
 
             reactionQueue.forEach(reaction => {
-                const key = `${reaction.postId}_${reaction.reactionType}`;
+                // JSON 키 사용 (언더스코어 문제 해결)
+                const key = JSON.stringify({ postId: reaction.postId, reactionType: reaction.reactionType });
                 reactionMap.set(key, (reactionMap.get(key) || 0) + 1);
             });
 
@@ -360,9 +371,9 @@
             const finalReactions = [];
             reactionMap.forEach((count, key) => {
                 if (count % 2 === 1) {  // 홀수 클릭만 전송
-                    const [postId, reactionType] = key.split('_');
+                    const { postId, reactionType } = JSON.parse(key);  // ✅ 안전한 파싱
                     finalReactions.push({
-                        postId: parseInt(postId),
+                        postId: postId,
                         reactionType: reactionType
                     });
                 }
@@ -372,44 +383,57 @@
             if (finalReactions.length === 0) {
                 console.log('No final reactions to send after compression');
                 reactionQueue.length = 0;
+                isSending = false;
                 return;
             }
 
             const payload = JSON.stringify({ reactions: finalReactions });
+            console.log('==================== SENDING BATCH ====================');
             console.log('Original queue size:', reactionQueue.length);
-            console.log('Compressed reactions to send:', finalReactions);
-
-            // 방법 1: Fetch API with keepalive (권장)
-            fetch('/kkumo/v1/reactions/batch', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: payload,
-                keepalive: true  // 페이지 종료 후에도 요청 완료 보장
-            }).then(response => {
-                console.log('Batch send response:', response.status);
-            }).catch(error => {
-                console.error('Batch send failed:', error);
+            console.log('Compressed reactions to send:', finalReactions.length);
+            finalReactions.forEach((r, i) => {
+                console.log(`  [${i}] postId=${r.postId}, type=${r.reactionType}`);
             });
+            console.log('Payload:', payload);
+            console.log('======================================================');
 
-            // 방법 2: navigator.sendBeacon (대안, 단 JSON 전송이 제한적)
-            // const blob = new Blob([payload], { type: 'application/json' });
-            // navigator.sendBeacon('/kkumo/v1/reactions/batch', blob);
-
-            // 큐 비우기
+            // 큐 즉시 비우기 (중복 전송 방지)
             reactionQueue.length = 0;
+
+            // 동기 전송: navigator.sendBeacon (페이지 언로드 시 가장 안정적)
+            const blob = new Blob([payload], { type: 'application/json' });
+            const beaconSent = navigator.sendBeacon('/kkumo/v1/reactions/batch', blob);
+
+            if (beaconSent) {
+                console.log('✅ Beacon sent successfully');
+            } else {
+                console.error('❌ Beacon failed, trying fetch...');
+                // Fallback: Fetch with keepalive
+                fetch('/kkumo/v1/reactions/batch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: payload,
+                    keepalive: true
+                }).catch(error => {
+                    console.error('❌ Fetch also failed:', error);
+                });
+            }
+
+            // 플래그 리셋 (비동기 환경에서도 안전하게)
+            setTimeout(() => { isSending = false; }, 100);
         }
 
-        // pagehide 이벤트: 페이지 이탈 시 배치 전송
+        // pagehide 이벤트: 페이지 이탈 시 배치 전송 (최신 브라우저)
         window.addEventListener('pagehide', function(event) {
-            console.log('Page hide event triggered');
+            console.log('📤 Page hide event triggered');
             sendReactionsBatch();
         });
 
-        // beforeunload 이벤트: pagehide를 지원하지 않는 브라우저 대비
+        // beforeunload 이벤트: pagehide를 지원하지 않는 구형 브라우저 대비
         window.addEventListener('beforeunload', function(event) {
-            console.log('Before unload event triggered');
+            console.log('📤 Before unload event triggered');
             sendReactionsBatch();
         });
 
