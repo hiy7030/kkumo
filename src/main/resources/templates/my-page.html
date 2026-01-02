@@ -579,13 +579,17 @@
 
     // ==================== Create Reactions HTML ====================
     function createReactionsHTML(item) {
-        const reactionTypes = ['LIKE', 'FIRE', 'HEART', 'CLAP', 'SAD'];
+        const reactionTypes = ['LIKE', 'FIRE', 'HEART', 'CLAP', 'SAD',
+        'LOL', 'CHEER_UP', 'CHECK'];
         const reactionEmojis = {
             'LIKE': '👍',
             'FIRE': '🔥',
             'HEART': '❤️',
             'CLAP': '👏',
-            'SAD': '😢'
+            'SAD': '😢',
+            'LOL': '😆',
+            'CHEER_UP': '💪',
+            'CHECK': '✅'
         };
 
         let html = '';

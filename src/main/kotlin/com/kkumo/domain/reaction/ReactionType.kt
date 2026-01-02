@@ -8,7 +8,11 @@ enum class ReactionType(
     FIRE("🔥", "멋져요"),
     HEART("❤️", "사랑해요"),
     CLAP("👏", "축하해요"),
-    SAD("😢", "슬퍼요");
+    SAD("😢", "슬퍼요"),
+    LOL("😆", "웃겨요"),
+    CHEER_UP("💪","힘내요"),
+    CHECK("✅", "확인"),
+    ;
 
     companion object {
         fun fromEmoji(emoji: String): ReactionType? {
