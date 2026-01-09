@@ -86,6 +86,7 @@ class SecurityConfig(
 
                 // 이메일 인증 허용 (회원가입 시 필요)
                 authorize("/kkumo/v1/mail/**", permitAll)
+                authorize("/kkumo/v1/test/**", permitAll)
 
                 // 정적 리소스 허용
                 authorize(PathRequest.toStaticResources().atCommonLocations(), permitAll)
