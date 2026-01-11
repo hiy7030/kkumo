@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link th:replace="~{fragments/layout :: favicon}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시글 상세 - KKUMO</title>
+    <meta th:replace="~{fragments/layout :: viewTransitionMeta}" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style th:replace="~{fragments/layout :: fadeInAnimation}"></style>
+</head>
+<body class="bg-white min-h-screen pb-24">
+
+<!-- Custom Header with Back Button -->
+<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <!-- Back Button -->
+        <button onclick="history.back()"
+                class="text-2xl text-[#8294C4] hover:text-[#6E80B0] transition active:scale-95 w-10 h-10 flex items-center justify-center">
+            ←
+        </button>
+
+        <!-- Logo -->
+        <span class="text-4xl" th:text="${hasCrown ? '👑' : '🐢'}">👑</span>
+
+        <!-- Empty Space (for symmetry) -->
+        <div class="w-10 h-10"></div>
+    </div>
+</header>
+
+<main class="max-w-3xl mx-auto px-4 py-6">
+
+    <!-- Single Post Detail -->
+    <div th:replace="~{fragments/feed :: feedItem(${post}, 'absolute', false)}"></div>
+
+    <!-- Private Post Badge -->
+    <div th:if="${post.isPrivate}"
+         class="px-4 mt-2 flex items-center space-x-1 text-xs text-[#8294C4]">
+        <span>🔒</span>
+        <span class="font-semibold">비밀글</span>
+    </div>
+
+</main>
+
+<!-- Image Viewer Modal (Lightbox) -->
+<div id="imageViewerModal" class="hidden fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm">
+    <button
+            onclick="closeImageViewer()"
+            class="absolute top-4 right-4 z-[110] w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full text-white text-2xl transition">
+        ✕
+    </button>
+
+    <div class="w-full h-full flex items-center justify-center p-4 overflow-auto" id="imageContainer">
+        <img
+                id="viewerImage"
+                src=""
+                alt="Original Image"
+                onclick="toggleZoom()"
+                class="max-w-full max-h-full object-contain rounded-lg cursor-zoom-in transition-transform duration-300"
+        />
+    </div>
+
+    <div onclick="closeImageViewer()" class="absolute inset-0 -z-10"></div>
+</div>
+
+<script th:inline="javascript">
+    // ==================== Image Viewer (Lightbox) Functions ====================
+    let isZoomed = false;
+
+    function openImageViewer(originalUrl) {
+        const modal = document.getElementById('imageViewerModal');
+        const viewerImage = document.getElementById('viewerImage');
+        modal.classList.remove('hidden');
+        viewerImage.src = originalUrl;
+        document.body.style.overflow = 'hidden';
+        isZoomed = false;
+        viewerImage.classList.remove('scale-150');
+        viewerImage.classList.add('cursor-zoom-in');
+        viewerImage.classList.remove('cursor-zoom-out');
+    }
+
+    function closeImageViewer() {
+        const modal = document.getElementById('imageViewerModal');
+        const viewerImage = document.getElementById('viewerImage');
+        modal.classList.add('hidden');
+        viewerImage.src = '';
+        document.body.style.overflow = '';
+        isZoomed = false;
+        viewerImage.classList.remove('scale-150');
+        viewerImage.classList.add('cursor-zoom-in');
+        viewerImage.classList.remove('cursor-zoom-out');
+    }
+
+    function toggleZoom() {
+        const viewerImage = document.getElementById('viewerImage');
+        isZoomed = !isZoomed;
+        if (isZoomed) {
+            viewerImage.classList.add('scale-150');
+            viewerImage.classList.remove('cursor-zoom-in');
+            viewerImage.classList.add('cursor-zoom-out');
+        } else {
+            viewerImage.classList.remove('scale-150');
+            viewerImage.classList.add('cursor-zoom-in');
+            viewerImage.classList.remove('cursor-zoom-out');
+        }
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const modal = document.getElementById('imageViewerModal');
+            if (!modal.classList.contains('hidden')) {
+                closeImageViewer();
+            }
+        }
+    });
+</script>
+
+<!-- Reaction Script -->
+<div th:replace="~{fragments/feed :: reactionScript}"></div>
+
+</body>
+</html>

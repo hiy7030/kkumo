@@ -9,11 +9,11 @@
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translate(-50%, -45%);
+                transform: translateY(20px) scale(0.95);
             }
             to {
                 opacity: 1;
-                transform: translate(-50%, -50%);
+                transform: translateY(0) scale(1);
             }
         }
 
@@ -24,9 +24,9 @@
 </head>
 <body class="overflow-hidden">
     <!-- Modal Backdrop -->
-    <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <!-- Modal Box -->
-        <div class="modal-content fixed top-1/2 left-1/2 w-11/12 max-w-md bg-white rounded-2xl shadow-lg border border-[#DBDFEA] p-8">
+        <div class="modal-content w-full max-w-md bg-white rounded-2xl shadow-lg border border-[#DBDFEA] p-8">
             <!-- Message -->
             <p class="text-slate-800 font-medium text-lg text-center mb-6" th:text="${message}">
                 메시지가 표시됩니다.

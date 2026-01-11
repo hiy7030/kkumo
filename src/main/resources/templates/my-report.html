@@ -8,6 +8,7 @@
     <meta th:replace="~{fragments/layout :: viewTransitionMeta}" />
     <script src="https://cdn.tailwindcss.com"></script>
     <th:block th:replace="~{fragments/layout :: alreadyPostedModalStyle}"></th:block>
+    <th:block th:replace="~{fragments/layout :: commonAlertModalStyle}"></th:block>
     <style th:replace="~{fragments/layout :: fadeInAnimation}"></style>
 </head>
 <body class="bg-white min-h-screen pb-24">
@@ -66,15 +67,17 @@
                 <!-- Empty Slot -->
                 <div th:if="${calendarDay.day == 0}"></div>
 
-                <!-- Day with Post (Show Emoji) -->
-                <div th:if="${calendarDay.day > 0 && calendarDay.hasPost}"
-                     class="text-3xl md:text-4xl">
+                <!-- Day with Post (Show Emoji - Clickable) -->
+                <a th:if="${calendarDay.day > 0 && calendarDay.postId != null}"
+                   th:href="@{/kkumo/v1/posts/{postId}(postId=${calendarDay.postId})}"
+                   class="text-3xl md:text-4xl cursor-pointer hover:scale-110 transition-transform">
                     <span th:text="${userEmoji}">😀</span>
-                </div>
+                </a>
 
-                <!-- Day without Post (Show Day Number) -->
-                <div th:if="${calendarDay.day > 0 && !calendarDay.hasPost}"
-                     class="text-base md:text-lg font-medium text-gray-700">
+                <!-- Day without Post (Show Day Number - Clickable with Modal) -->
+                <div th:if="${calendarDay.day > 0 && calendarDay.postId == null}"
+                     onclick="showModal('이 날은 기록하지 않았습니다.');"
+                     class="text-base md:text-lg font-medium text-gray-700 cursor-pointer hover:text-[#8294C4] transition-colors">
                     <span th:text="${calendarDay.day}">1</span>
                 </div>
             </div>
@@ -95,6 +98,7 @@
 <div th:replace="~{fragments/layout :: navbar('calendar', ${hasPostedToday})}"></div>
 
 <div th:replace="~{fragments/layout :: alreadyPostedModal}"></div>
+<div th:replace="~{fragments/layout :: commonAlertModal}"></div>
 
 <script th:inline="javascript">
     // Upload Button Click Handler
@@ -112,6 +116,7 @@
 </script>
 
 <div th:replace="~{fragments/layout :: alreadyPostedModalScript}"></div>
+<div th:replace="~{fragments/layout :: commonAlertModalScript}"></div>
 
 </body>
 </html>

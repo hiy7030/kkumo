@@ -52,7 +52,7 @@ class ReportController(
 
         // 해당 월의 게시글 조회
         val posts = postRepository.findAllByMemberAndPostedDateBetween(member, startDate, endDate)
-        val postedDates = posts.map { it.postedDate }.toSet()
+        val dateToPostIdMap = posts.associate { it.postedDate to it.id }
 
         // 달력 데이터 생성
         val calendarDays = mutableListOf<CalendarDay>()
@@ -62,14 +62,15 @@ class ReportController(
 
         // 빈칸 추가 (일요일부터 시작)
         repeat(firstDayOfWeek) {
-            calendarDays.add(CalendarDay(day = 0, hasPost = false, date = null))
+            calendarDays.add(CalendarDay(day = 0, hasPost = false, date = null, postId = null))
         }
 
         // 실제 날짜 추가
         for (day in 1..targetYearMonth.lengthOfMonth()) {
             val date = targetYearMonth.atDay(day)
-            val hasPost = date in postedDates
-            calendarDays.add(CalendarDay(day = day, hasPost = hasPost, date = date))
+            val postId = dateToPostIdMap[date]
+            val hasPost = postId != null
+            calendarDays.add(CalendarDay(day = day, hasPost = hasPost, date = date, postId = postId))
         }
 
         // 이전/다음 월 계산
@@ -161,10 +162,12 @@ class ReportController(
      * @param day 일자 (0이면 빈칸)
      * @param hasPost 게시글 존재 여부
      * @param date 실제 LocalDate (빈칸인 경우 null)
+     * @param postId 게시글 ID (게시글이 없으면 null)
      */
     data class CalendarDay(
         val day: Int,
         val hasPost: Boolean,
-        val date: LocalDate?
+        val date: LocalDate?,
+        val postId: Long?
     )
 }

@@ -10,6 +10,7 @@ import com.kkumo.global.error.ErrorCode
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 import java.time.LocalDate
 
@@ -91,5 +92,35 @@ class PostViewController(
         model.addAttribute("reactionTypes", ReactionType.entries)
 
         return "home"
+    }
+
+    /**
+     * 게시글 상세 조회 페이지
+     * GET /kkumo/v1/posts/{postId}
+     *
+     * 단일 게시글의 상세 정보를 표시
+     * - 비공개 게시글인 경우 작성자 본인만 조회 가능
+     * - 리액션 기능 제공
+     */
+    @GetMapping("/posts/{postId}")
+    fun postDetailPage(
+        @PathVariable postId: Long,
+        @AuthenticationPrincipal user: CustomUserDetails,
+        model: Model
+    ): String {
+        // DB에서 최신 Member 정보를 조회
+        val currentMember = memberRepository.findById(user.member.id)
+            .orElseThrow { BusinessException(ErrorCode.MEMBER_NOT_FOUND) }
+
+        // 게시글 상세 조회 (권한 체크 포함)
+        val post = postService.getPostDetail(postId, currentMember)
+
+        // 모델에 데이터 추가
+        model.addAttribute("post", post)
+        model.addAttribute("isMyPost", post.nickname == currentMember.nickname)
+        model.addAttribute("hasCrown", currentMember.hasCrown)
+        model.addAttribute("reactionTypes", ReactionType.entries)
+
+        return "post-detail"
     }
 }

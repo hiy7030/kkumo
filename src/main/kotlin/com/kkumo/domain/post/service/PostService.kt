@@ -302,4 +302,59 @@ class PostService(
             HomeResponse.FeedResponse.from(post, allReactions)
         }
     }
+
+    /**
+     * 게시글 상세 조회
+     * - 단일 게시글의 상세 정보 조회
+     * - 비공개 게시글인 경우 작성자 본인만 조회 가능
+     * - 실제 Reaction 개수 집계
+     *
+     * @param postId 조회할 게시글 ID
+     * @param user 현재 로그인한 사용자
+     * @return FeedResponse
+     */
+    fun getPostDetail(postId: Long, user: Member): HomeResponse.FeedResponse {
+        // 1. 게시글 조회 (Member JOIN FETCH로 N+1 방지)
+        val post = postRepository.findById(postId)
+            .orElseThrow { BusinessException(ErrorCode.POST_NOT_FOUND) }
+
+        // 2. 비공개 게시글 권한 체크
+        if (post.member.id != user.id) {
+            throw BusinessException(ErrorCode.FORBIDDEN)
+        }
+
+        // 3. 해당 게시글의 리액션 개수 집계
+        val reactionCounts = reactionRepository.countByPostsGroupByType(listOf(post))
+
+        // 4. 해당 게시글의 최근 반응자 조회 (Window Function으로 DB 레벨에서 TOP 3 추출)
+        val postIds = listOfNotNull(post.id)
+        val reactionReactors = reactionRepository.findRecentReactorsByPosts(postIds)
+
+        // 5. 현재 사용자가 남긴 활성화된 리액션 조회
+        val myActiveReactions = reactionRepository.findMyActiveReactions(user.id, postIds)
+        val myReactionMap = myActiveReactions
+            .groupBy { it.getPostId() to it.getEmojiType() }
+            .mapValues { true }
+
+        // 6. ReactionType -> Count 맵 생성
+        val postCountMap = reactionCounts
+            .associate { it.getReactionType() to it.getCount().toInt() }
+
+        // 7. ReactionType별로 최근 반응자 리스트 생성 (최대 3명)
+        val reactionReactorMap = reactionReactors
+            .groupBy { it.getReactionType() }
+            .mapValues { (_, projections) ->
+                projections.take(3).map { it.getReactorNickname() }
+            }
+
+        // 8. Post 엔티티를 FeedResponse로 변환
+        val allReactions = ReactionType.entries.associateWith { type ->
+            val count = postCountMap[type] ?: 0
+            val reactors = reactionReactorMap[type] ?: emptyList()
+            val isMeReacted = myReactionMap[postId to type] ?: false
+            HomeResponse.ReactionInfo(count, reactors, isMeReacted)
+        }
+
+        return HomeResponse.FeedResponse.from(post, allReactions)
+    }
 }

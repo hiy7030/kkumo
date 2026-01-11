@@ -17,6 +17,8 @@ class KkumoProperties {
      *
      * 이 날짜 이전의 데이터 조회 및 네비게이션을 제한
      * (당일은 접근 가능)
+     *
+     * application.yml의 kkumo.base-date 값에서 자동으로 바인딩됨
      */
-    var baseDate: LocalDate = LocalDate.of(2025, 12, 1)
+    lateinit var baseDate: LocalDate
 }
