@@ -3,7 +3,7 @@ package com.kkumo.global.error
 enum class ErrorCode(val message: String) {
     MEMBER_NOT_FOUND("회원을 찾을 수 없습니다."),
     MEMBER_ALREADY_EXISTS("이미 존재하는 회원입니다."),
-    EMAIL_ALREADY_EXISTS("이미 사용 중인 이메일입니다."),
+    EMAIL_ALREADY_EXISTS("이미 가입된 메일 주소입니다."),
     NICKNAME_ALREADY_EXISTS("이미 사용 중인 닉네임입니다."),
     EMOJI_ALREADY_EXISTS("이미 사용 중인 이모지입니다."),
     CROWN_EMOJI_NOT_ALLOWED("왕관 이모지는 시스템 전용입니다."),

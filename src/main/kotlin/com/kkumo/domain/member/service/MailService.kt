@@ -1,5 +1,6 @@
 package com.kkumo.domain.member.service
 
+import com.kkumo.domain.member.repository.MemberRepository
 import com.kkumo.global.error.BusinessException
 import com.kkumo.global.error.ErrorCode
 import jakarta.mail.internet.MimeMessage
@@ -15,7 +16,8 @@ import kotlin.random.Random
 @Service
 class MailService(
     private val mailSender: JavaMailSender,
-    private val templateEngine: TemplateEngine
+    private val templateEngine: TemplateEngine,
+    private val memberRepository: MemberRepository
 ) {
 
     private val verificationStorage = ConcurrentHashMap<String, VerificationInfo>()
@@ -26,6 +28,11 @@ class MailService(
     )
 
     fun sendVerificationCode(email: String): String {
+        // 이메일 중복 체크
+        if (memberRepository.existsByEmail(email)) {
+            throw BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS)
+        }
+
         val code = generateVerificationCode()
         val expiresAt = LocalDateTime.now().plusMinutes(3)
 

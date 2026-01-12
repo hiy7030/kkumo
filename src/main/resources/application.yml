@@ -8,11 +8,11 @@ spring:
     open-in-view: true
     show-sql: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
-        format_sql: true
-        show_sql: true
+        format_sql: false
+        show_sql: false
         jdbc:
           batch_size: 50
         order_inserts: true
@@ -53,4 +53,4 @@ cloud:
       auto: false
 
 kkumo:
-  base-date: 2026-01-10
+  base-date: 2026-01-12
