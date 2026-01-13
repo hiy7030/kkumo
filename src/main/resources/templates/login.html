@@ -66,9 +66,14 @@
             <!-- 로그인 버튼 -->
             <button
                 type="submit"
-                class="w-full bg-[#8294C4] hover:bg-[#6E80B0] text-white font-bold py-3 rounded-full transition-colors duration-200"
+                id="loginBtn"
+                class="w-full bg-[#8294C4] hover:bg-[#6E80B0] text-white font-bold py-3 rounded-full transition-colors duration-200 flex items-center justify-center gap-2"
             >
-                로그인
+                <svg id="loginSpinner" class="animate-spin h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span id="loginBtnText">로그인</span>
             </button>
         </form>
 
@@ -102,5 +107,21 @@
             </p>
         </div>
     </div>
+
+    <script>
+        // 로그인 버튼 로딩 애니메이션
+        const loginForm = document.querySelector('form');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginSpinner = document.getElementById('loginSpinner');
+        const loginBtnText = document.getElementById('loginBtnText');
+
+        loginForm.addEventListener('submit', () => {
+            // 로딩 상태 표시
+            loginBtn.disabled = true;
+            loginBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            loginSpinner.classList.remove('hidden');
+            loginBtnText.textContent = '로그인 중...';
+        });
+    </script>
 </body>
 </html>

@@ -29,8 +29,12 @@
                 id="submitBtn"
                 type="button"
                 class="bg-[#8294C4] text-white px-5 py-1.5 rounded-full font-semibold text-sm transition
-                       hover:bg-[#6E80B0] cursor-pointer">
-            기록하기
+                       hover:bg-[#6E80B0] cursor-pointer flex items-center gap-2">
+            <svg id="submitSpinner" class="animate-spin h-4 w-4 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span id="submitBtnText">기록하기</span>
         </button>
     </div>
 </header>
@@ -206,9 +210,13 @@
         }
 
         // 2. 버튼 비활성화 (중복 클릭 방지 & 로딩 표시)
+        const submitSpinner = document.getElementById('submitSpinner');
+        const submitBtnText = document.getElementById('submitBtnText');
+
         submitBtn.disabled = true;
-        submitBtn.textContent = '이미지 압축 중...';
         submitBtn.classList.add('opacity-75', 'cursor-wait');
+        submitSpinner.classList.remove('hidden');
+        submitBtnText.textContent = '이미지 압축 중...';
 
         try {
             // 이미지 압축
@@ -221,7 +229,7 @@
             const compressedFile = await imageCompression(selectedFile, options);
 
             // 업로드 시작 UI 업데이트
-            submitBtn.textContent = '업로드 중...';
+            submitBtnText.textContent = '업로드 중...';
 
             const formData = new FormData();
             formData.append('image', compressedFile);
@@ -242,21 +250,24 @@
             const result = await response.json();
 
             if (result.success) {
+                submitBtnText.textContent = '완료!';
                 location.href = '/kkumo/v1/home';
             } else {
                 showModal(result.message || '기록에 실패했습니다.');
                 // 실패 시 복구
                 submitBtn.disabled = false;
-                submitBtn.textContent = '기록하기';
                 submitBtn.classList.remove('opacity-75', 'cursor-wait');
+                submitSpinner.classList.add('hidden');
+                submitBtnText.textContent = '기록하기';
             }
         } catch (error) {
             console.error('Error:', error);
             showModal('이미지 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
             // 에러 시 복구
             submitBtn.disabled = false;
-            submitBtn.textContent = '기록하기';
             submitBtn.classList.remove('opacity-75', 'cursor-wait');
+            submitSpinner.classList.add('hidden');
+            submitBtnText.textContent = '기록하기';
         }
     });
 
