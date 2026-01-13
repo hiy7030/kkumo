@@ -2,6 +2,7 @@ package com.kkumo.domain.member
 
 import com.kkumo.domain.member.dto.MemberIdGenerator
 import com.kkumo.global.common.BaseTimeEntity
+import com.kkumo.global.utils.EmojiUtils
 import jakarta.persistence.*
 import org.springframework.data.domain.Persistable
 import java.time.LocalDate
@@ -81,5 +82,15 @@ class Member(
      */
     fun updatePassword(encodedPassword: String) {
         this.password = encodedPassword
+    }
+
+    /**
+     * JPA 라이프사이클 훅: 엔티티가 영속화되기 전 자동 실행
+     * 이모지 정규화를 강제하여 DB 일관성 보장
+     */
+    @PrePersist
+    @PreUpdate
+    private fun normalizeEmoji() {
+        this.myEmoji = EmojiUtils.normalize(this.myEmoji)
     }
 }

@@ -91,4 +91,9 @@ class MemberApiController(
         val pageNumber: Int,
         val pageSize: Int
     )
+
+    @GetMapping("/test")
+    fun test() {
+        memberService.test()
+    }
 }
