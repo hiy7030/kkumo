@@ -38,6 +38,7 @@ dependencies {
     implementation(platform("software.amazon.awssdk:bom:2.29.0"))
     implementation("software.amazon.awssdk:s3")
     implementation("net.coobird:thumbnailator:0.4.20")
+    implementation("com.github.gotson:webp-imageio:0.2.2")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
 }
 

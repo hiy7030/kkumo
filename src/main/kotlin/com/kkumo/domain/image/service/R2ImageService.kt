@@ -34,27 +34,20 @@ class R2ImageService(
             throw BusinessException(ErrorCode.INVALID_INPUT, "이미지 파일만 업로드 가능합니다. (제출된 형식: $contentType)")
         }
 
-        // 3. 파일명 생성 (UUID 기반)
-        val originalFilename = file.originalFilename ?: "image.jpg"
-        val extension = originalFilename.substringAfterLast(".", "jpg").lowercase()
-        val baseUuid = UUID.randomUUID()
-        val thumbnailFileName = "${baseUuid}_thumb.$extension"
-        val originalFileName = "${baseUuid}_original.$extension"
+        // 3. 파일명 생성 (UUID 기반, WebP 확장자)
+        val fileName = "${UUID.randomUUID()}.webp"
 
-        // 4. 썸네일 생성 및 업로드 (1200x1200, 품질 80%)
-        val thumbnailBytes = createThumbnail(file)
-        uploadToR2(thumbnailFileName, thumbnailBytes, contentType)
-        val thumbnailUrl = "$publicDomain$thumbnailFileName"
+        // 4. 이미지 최적화 (1080px, WebP, 품질 80%)
+        val optimizedImageBytes = optimizeImage(file)
 
-        // 5. 원본 이미지 업로드 (압축 없이 그대로)
-        val originalBytes = file.bytes
-        uploadToR2(originalFileName, originalBytes, contentType)
-        val originalImageUrl = "$publicDomain$originalFileName"
+        // 5. R2에 업로드
+        uploadToR2(fileName, optimizedImageBytes, "image/webp")
+        val imageUrl = "$publicDomain$fileName"
 
-        // 6. 반환
+        // 6. 썸네일과 원본 URL을 동일하게 반환
         return ImageUploadResult(
-            thumbnailUrl = thumbnailUrl,
-            originalImageUrl = originalImageUrl
+            thumbnailUrl = imageUrl,
+            originalImageUrl = imageUrl
         )
     }
 
@@ -82,19 +75,21 @@ class R2ImageService(
     }
 
     /**
-     * 썸네일 생성 (목록용 - 1200x1200, 품질 80%)
+     * 이미지 최적화 (1080px 리사이징, WebP 포맷, 품질 80%)
      */
-    private fun createThumbnail(file: MultipartFile): ByteArray {
+    private fun optimizeImage(file: MultipartFile): ByteArray {
         val outputStream = ByteArrayOutputStream()
 
         try {
             Thumbnails.of(file.inputStream)
-                .size(1200, 1200)
+                .useExifOrientation(true)
+                .size(1080, 1080)
+                .outputFormat("webp")
                 .outputQuality(0.8)
                 .toOutputStream(outputStream)
         } catch (e: Exception) {
-            // 압축 실패 시 원본 반환
-            return file.bytes
+            // 최적화 실패 시 예외 발생
+            throw BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "이미지 최적화 중 오류가 발생했습니다: ${e.message}")
         }
 
         return outputStream.toByteArray()
