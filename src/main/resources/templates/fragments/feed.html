@@ -36,31 +36,35 @@
     </div>
 
     <div class="px-4">
-        <div class="w-full aspect-square bg-gray-50 rounded-2xl border border-[#DBDFEA] overflow-hidden flex items-center justify-center relative">
-            <!-- Clickable Image (public post or my-page) -->
+        <div class="w-full aspect-square bg-gray-50 rounded-2xl border border-[#DBDFEA] overflow-hidden flex items-center justify-center relative select-none"
+             oncontextmenu="return false"
+             ondragstart="return false"
+             onselectstart="return false">
+
             <img th:if="${!(item.isPrivate && interactive)}"
-                    th:src="${item.thumbnailUrl}"
-                    th:data-original-url="${item.originalImageUrl}"
-                    onclick="openImageViewer(this.getAttribute('data-original-url'))"
-                    alt="Feed Image"
-                    class="w-full h-full object-contain cursor-pointer hover:opacity-90 transition"
+                 th:src="${item.thumbnailUrl}"
+                 th:data-original-url="${item.originalImageUrl}"
+                 onclick="openImageViewer(this.getAttribute('data-original-url'))"
+                 alt="Feed Image"
+                 class="w-full h-full object-contain cursor-pointer hover:opacity-90 transition"
             />
 
-            <!-- Non-clickable Blurred Image (private post in home feed) -->
             <img th:if="${item.isPrivate && interactive}"
-                    th:src="${item.thumbnailUrl}"
-                    alt="Feed Image"
-                    class="w-full h-full object-contain cursor-default blur-lg"
+                 th:src="${item.thumbnailUrl}"
+                 alt="Feed Image"
+                 class="w-full h-full object-contain blur-lg pointer-events-none"
+                 style="-webkit-touch-callout: none;"
             />
 
-            <!-- Private Post Overlay (only in home feed) -->
             <div th:if="${item.isPrivate && interactive}"
-                 class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                 class="absolute inset-0 flex items-center justify-center z-10 cursor-default"
+                 onclick="alert('비공개 게시글입니다.')">
                 <div class="text-center">
                     <span class="text-5xl mb-2 block">🔒</span>
                     <span class="text-white font-semibold text-sm bg-black/40 px-3 py-1 rounded-full">비밀글</span>
                 </div>
             </div>
+
         </div>
     </div>
 
